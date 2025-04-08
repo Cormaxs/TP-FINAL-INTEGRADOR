@@ -1,0 +1,32 @@
+{
+  "name": "tp-integrador-final",
+  "version": "1.0.0",
+  "description": "Trabajo integrador final - API con Express y MongoDB",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "postinstall": "echo '✅ Instalación completada con éxito.' || echo '❌ Error durante la instalación de módulos.'"
+  },
+  "author": "Tu Nombre",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "mongoose": "^8.13.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "express",
+    "api",
+    "mongoose",
+    "tp-final",
+    "backend"
+  ]
+}
