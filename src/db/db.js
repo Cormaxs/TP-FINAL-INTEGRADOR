@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
 
-const uri = "mongodb://admin:secure_password@45.236.128.209:27017/?authSource=admin";
+
 
 export const connectDB = async () => {
+  const uri = process.env.URI;
   try {
     await mongoose.connect(uri, {
       dbName: "TrabajoIntegrador",
