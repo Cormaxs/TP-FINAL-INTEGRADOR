@@ -1,0 +1,32 @@
+http://localhost:3000/users?page=2&limit=1 -> con paginacion
+
+
+get 
+http://localhost:3000/users
+
+
+post id
+http://localhost:3000/user/67f5d7cbbf8e1d21c52e0bcf
+
+
+post login
+http://localhost:3000/user/login
+
+{
+  "email": "tomas122222222222222222sss22222@example.com",
+  "password": "Hola123@"
+}
+
+post crear cuenta
+http://localhost:3000/user
+{
+  "nombre": "tomas",
+  "email": "tomas1@ejemplo.com",
+  "password": "Hola123@"
+}
+
+post verificar token  -> siempre mandarlo en el header, nunca en el json
+http://localhost:3000/user/sesion
+ headers: {
+    "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3ZjVkN2NiYmY4ZTFkMjFjNTJlMGJjZiIsImVtYWlsIjoidG9tYXMxMjIyMjIyMjIyMjIyMjIyMjJzc3MyMjIyMkBleGFtcGxlLmNvbSIsImlhdCI6MTc0NDE2NzMxOSwiZXhwIjoxNzQ0MjUzNzE5fQ.1ELXF00D23fyo-melgX8l6lAnWcIGORP0QjytzrVKq8`
+  }
