@@ -1,48 +1,10 @@
-import {crearUserServices, buscarUserId, traerTodosusuarios} from "../services/userServices.js"
-import {encriptarPassword, compararPassword} from "../utils/bcrypt.js"
+import { traerTodosusuarios} from "../services/userServices.js"
+import { compararPassword} from "../utils/bcrypt.js"
 import {User} from "../models/userModels.js"
 import {crearToken} from "../utils/jwt.js"
 
 
 
-export async function crearUsuario(req, res) {
-  try {
-    const datos = req.body;
-    const {password} = datos;
-    datos.password = await encriptarPassword(password);
-    console.log(datos)
-    const resultado = await crearUserServices(datos);
-    if (resultado) {
-      return res.status(201).send("Datos guardados y usuario creado");
-    }
-      return res.send("No se pudo guardar el usuario");
-
-  } catch (error) {
-    console.error("Error en crearUsuario:", error.message);
-
-    // Respondemos con un error genérico para el cliente
-    res.status(500).send("Error interno del servidor");
-  }
-}
-
-
-export async function buscarUsuario(req, res) {
-  try {
-    const { id } = req.params;
-    const usuario = await buscarUserId(id);
-
-    if (!usuario) {
-      return res.status(404).json({ mensaje: "Usuario no encontrado" });
-    }
-    res.json({
-      mensaje: "Usuario encontrado",
-      usuario,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error del servidor" });
-  }
-}
 
 
 export async function iniciarSesion(req, res) {

@@ -21,3 +21,21 @@ export const validarUsuario = [
     next();
   }
 ];
+
+//verifica los campos vacios y pasa los que no lo estan
+export const datosActualizar = (req, res, next) => {
+  const datos = req.body;
+
+  const datosFiltrados = Object.fromEntries(
+    Object.entries(datos).filter(
+      ([clave, valor]) => valor !== "" && valor !== null && valor !== undefined
+    )
+  );
+
+  if (Object.keys(datosFiltrados).length === 0) {
+    return res.status(400).json({ message: "No se enviaron datos válidos para actualizar." });
+  }
+
+  req.body = datosFiltrados; // Reemplazamos por los datos limpios
+  next(); // Pasamos al siguiente middleware o controlador
+};

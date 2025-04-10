@@ -1,31 +1,17 @@
 import {User} from "../models/userModels.js"
 
-export async function crearUserServices(datos) {
-    try {
-      const usuario = new User(datos);
-      const usuarioGuardado = await usuario.save();
-      return usuarioGuardado;
-    } catch (error) {
-      console.error("Error al guardar el usuario:", error.message);
-      throw new Error("No se pudo guardar el usuario");
-    }
-  }
-
-  export async function buscarUserId(id) {
-    try {
-      const usuario = await User.findById(id);
-      return usuario; // puede ser null si no existe
-    } catch (err) {
-      console.error("Error al buscar usuario por ID:", err.message);
-      throw err; // relanzamos para que el controller lo pueda manejar
-    }
-  }
 
 
 
 export async function traerTodosusuarios(page, limit) {
+   page = encodeURIComponent(page);
+   limit = encodeURIComponent(limit)
   try {
-    const usuarios = await User.find()//busco en db
+    const usuarios = await User.find()
+    .select('-password')
+    .select('-email')
+    .select('-__v')
+    //busco en db
     //skip -> ignora cierta cantidad de documentos
     //pagina numero de pagina a mostrar
     //limit cantidad de items por pagina
@@ -35,13 +21,18 @@ export async function traerTodosusuarios(page, limit) {
       //cuenta cuantos items hay en la coleccion, se usa para saber cuantas paginas hay en total
     const total = await User.countDocuments();
 
-    //devuelve un objeto con los datos organizados
+    const paginaActual = parseInt(page);
+    const totalPaginas = Math.ceil(total / limit);
+    
     return {
-      page: parseInt(page),
-      totalPages: Math.ceil(total / limit),// cuántas páginas hay en total
+      page: paginaActual,
+      totalPages: totalPaginas,
       totalUsers: total,
-      users: usuarios //los usuarios que se mostrarán en esta página
+      anterior: paginaActual > 1 ? paginaActual - 1 : null,
+      siguiente: paginaActual < totalPaginas ? paginaActual + 1 : null,
+      users: usuarios
     };
+    
   } catch (err) {
     console.error(err);
     throw new Error("Error al obtener los usuarios");

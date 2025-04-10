@@ -1,5 +1,6 @@
 import express from "express"; // Importamos express
-import router from "./src/routes/userRoutes.js"; // Importamos las rutas (¡no te olvides la extensión .js si estás usando ESModules!)
+import {userRoutes} from "./src/routes/crudUser.js"; // Importamos las rutas (¡no te olvides la extensión .js si estás usando ESModules!)
+import { cuenta } from "./src/routes/cuenta.js";
 import { connectDB} from "./src/db/db.js"
 import dotenv from 'dotenv';
 
@@ -10,8 +11,10 @@ const PORT = 3000; // Puerto donde se va a levantar el servidor
 app.use(express.json()); // Esto permite leer JSON en las rutas POST
 
 
-// Middleware de rutas
-app.use("/", router);
+
+
+app.use("/user", userRoutes);
+app.use("/cuenta", cuenta);
 connectDB();
 
 // Escuchamos el puerto

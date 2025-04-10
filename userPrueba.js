@@ -3,7 +3,7 @@ const users = [];
 // Función para enviar un usuario al servidor
 async function postUser(user) {
   try {
-    const response = await fetch('http://localhost:3000/user', {
+    const response = await fetch('http://localhost:3000/user/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -26,13 +26,13 @@ async function postUser(user) {
 async function generateAndPostUsers() {
   for (let i = 1; i <= 100; i++) {
     const user = {
-      nombre: `tomas${i}`,
-      email: `tomas${i}@example.com`,
+      nombre: `usuario${i}`,
+      email: `usuario${i}@example.com`,
       password: "Hola123@",
     };
 
     users.push(user);
-    console.log(`🔄 Enviando usuario ${i}/50: ${user.nombre}`);
+    console.log(`🔄 Enviando usuario ${i}/100: ${user.nombre}`);
 
     await postUser(user);
     await new Promise(resolve => setTimeout(resolve, 300)); // Retraso de 300ms entre peticiones
