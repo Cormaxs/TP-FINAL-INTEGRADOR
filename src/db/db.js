@@ -6,7 +6,7 @@ export const connectDB = async () => {
   const uri = process.env.URI;
   try {
     await mongoose.connect(uri, {
-      dbName: "TrabajoIntegrador",
+      dbName: "tp_final_nodo",
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
