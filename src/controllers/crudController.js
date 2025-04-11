@@ -1,7 +1,6 @@
 import { encriptarPassword } from "../utils/bcrypt.js"
 import { crearUserServices, buscarUserId, modificarUserId, eliminarUserId } from "../services/crudServices.js"
 
-
 export async function crearUsuario(req, res) {
     try {
         const datos = req.body;
@@ -9,15 +8,13 @@ export async function crearUsuario(req, res) {
         datos.password = await encriptarPassword(password);
         const resultado = await crearUserServices(datos);
         if (resultado) {
-            return res.status(201).send("Datos guardados y usuario creado");
+            return res.status(201).send("usuario creado correctamente");
         }
         return res.send("No se pudo guardar el usuario");
 
     } catch (error) {
-        console.error("Error en crearUsuario:", error.message);
-
         // Respondemos con un error genérico para el cliente
-        res.status(500).send("Error interno del servidor");
+        res.status(500).send("Error al crear el usuario");
     }
 }
 
@@ -55,8 +52,6 @@ export async function traerUsuario(req, res) {
         res.status(500).json({ error: "Error del servidor" });
     }
 }
-
-
 
 export async function eliminarUsuario(req, res) {
 

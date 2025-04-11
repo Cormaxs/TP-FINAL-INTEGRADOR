@@ -1,14 +1,18 @@
-import { User } from "../models/userModels.js"
-
+import { User } from "../models/userModel.js"
+import {CustomError} from "../utils/crearError.js"
 
 export async function crearUserServices(datos) {
-    try {
+    const {email} = datos;
+    try { 
+        const emailExiste = await User.findOne({email});
+        if(emailExiste){
+            throw new CustomError(409, "El email ya está registrado"); // ✅ Detenemos el proceso
+        }
         const usuario = new User(datos);
         const usuarioGuardado = await usuario.save();
         return usuarioGuardado;
     } catch (error) {
-        console.error("Error al guardar el usuario:", error.message);
-        throw new Error("No se pudo guardar el usuario");
+        console.error(err)
     }
 }
 
@@ -20,8 +24,7 @@ export async function buscarUserId(id) {
         .select('-__v');
         return usuario; // puede ser null si no existe
     } catch (err) {
-        console.error("Error al buscar usuario por ID:", err.message);
-        throw err; // relanzamos para que el controller lo pueda manejar
+        throw new CustomError(404, "Error al buscar usuario por ID:"); // relanzamos para que el controller lo pueda manejar
     }
 }
 
@@ -37,7 +40,7 @@ export async function modificarUserId(data, id) {
             return true;
         } return false;
     } catch (err) {
-        console.error(err)
+        throw new CustomError(500, "error al actualizar los datos")
     }
 }
 
@@ -48,6 +51,6 @@ export async function eliminarUserId(id) {
             return true;
         } return false;
     } catch (err) {
-        console.error("error de services", err)
+        throw new CustomError(500, "error al eliminar usuario")
     }
 }
