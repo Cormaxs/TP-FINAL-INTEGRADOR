@@ -1,48 +1,10 @@
-import {User} from "../models/userModel.js"
+import {User} from "../models/fotografoModel.js"
 import {CustomError} from "../utils/crearError.js"
 
+//agregar las demas qerrys, si le paso vacio me devuelve todos los usuarios
 
-//trae los datos de los usuarios, los que se puedan ver
-export async function traerTodosusuarios(page, limit) {
-   page = encodeURIComponent(page);
-   limit = encodeURIComponent(limit)
-  try {
-    const usuarios = await User.find()
-    .select('-password')
-    .select('-email')
-    .select('-__v')
-    //busco en db
-    //skip -> ignora cierta cantidad de documentos
-    //pagina numero de pagina a mostrar
-    //limit cantidad de items por pagina
-      .skip((page - 1) * limit)//ejemplo : .skip((3 - 1) * 10)=20 -> ignoro los primeros 20 items
-      .limit(parseInt(limit));//limita la cantidad de items que trae
-
-      //cuenta cuantos items hay en la coleccion, se usa para saber cuantas paginas hay en total
-    const total = await User.countDocuments();
-
-    const paginaActual = parseInt(page);
-    const totalPaginas = Math.ceil(total / limit);
-    
-    return {
-      page: paginaActual,
-      totalPages: totalPaginas,
-      totalUsers: total,
-      anterior: paginaActual > 1 ? paginaActual - 1 : null,
-      siguiente: paginaActual < totalPaginas ? paginaActual + 1 : null,
-      users: usuarios
-    };
-    
-  } catch (err) {
-    throw new CustomError(400, "Error al obtener los usuarios");
-  }
-}
-
-
-
-//agregar las demas qerrys
 export async function buscadorSitioTodo(filtrosBusqueda = {}) {
-  let { name = '', place = '', page = 1, limit = 10 } = filtrosBusqueda;
+  let { page, limit, ...restoFiltros } = filtrosBusqueda;
 
   // Asegurar que page y limit sean enteros positivos
   page = parseInt(page);
@@ -52,17 +14,19 @@ export async function buscadorSitioTodo(filtrosBusqueda = {}) {
     throw new CustomError(400, "Parámetros de paginación inválidos");
   }
 
-  const filtro = {
-    nombre: { $regex: name, $options: 'i' },
-    ubicacion: { $regex: place, $options: 'i' }
-  };
+  // Crear filtro dinámico para todos los campos string excepto paginación
+  const filtro = {};
+  for (const [campo, valor] of Object.entries(restoFiltros)) {
+    if (typeof valor === 'string' && valor.trim() !== '') {
+      filtro[campo] = { $regex: valor, $options: 'i' }; // búsqueda insensible a mayúsculas
+    }
+  }
 
   try {
-    // Total sin paginación (para saber cuántos hay)
     const totalResultados = await User.countDocuments(filtro);
 
     const resultados = await User.find(filtro)
-      .select('-password -email -__v') // opcional: excluir campos sensibles
+      .select('-password -email -__v') // excluir campos sensibles
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -82,3 +46,4 @@ export async function buscadorSitioTodo(filtrosBusqueda = {}) {
     throw err;
   }
 }
+

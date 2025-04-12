@@ -1,5 +1,5 @@
 import { compararPassword} from "../utils/bcrypt.js"
-import {User} from "../models/userModel.js"
+import {User} from "../models/fotografoModel.js"
 import {crearToken} from "../utils/jwt.js"
 
 

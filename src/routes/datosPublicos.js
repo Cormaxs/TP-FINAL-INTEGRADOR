@@ -1,13 +1,12 @@
 import { Router } from "express";
-import {traerTodosUsuarios, buscadorSitio } from "../controllers/datosPublicosController.js"
+import { buscadorSitio } from "../controllers/datosPublicosController.js"
+
 
 export const publico = Router();
 
 
-// Ruta principal
-publico.get("/usuarios", traerTodosUsuarios);
 
 
-//buscar por name
+//buscador general, si mando sin parametros, me devuelve todos los users
 publico.get("/buscador", buscadorSitio)
 
