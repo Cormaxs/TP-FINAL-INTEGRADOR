@@ -1,8 +1,9 @@
-import { User } from "../models/userModel.js"
+import { User } from "../models/fotografoModel.js"
 import {CustomError} from "../utils/crearError.js"
 
 export async function crearUserServices(datos) {
     const {email} = datos;
+    console.log(`usuario a crear: ${datos}`)
     try { 
         const emailExiste = await User.findOne({email});
         if(emailExiste){
