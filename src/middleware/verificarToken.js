@@ -14,11 +14,10 @@ export function verificarToken(req, res, next) {
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, SECRET_KEY); // ✅ Valida firma y expiración
-    req.usuario = decoded; // 💾 Guarda datos útiles en el request
-    next(); // ✅ Sigue al siguiente middleware o controlador
+    const decoded = jwt.verify(token, SECRET_KEY); //  Valida firma y expiración
+    req.usuario = decoded; // Guarda datos útiles en el request
+    next(); // Sigue al siguiente middleware o controlador
   } catch (err) {
-    console.error("❌ Error al verificar token:", err.message);
-    return res.status(403).json({ mensaje: "Token inválido o expirado" });
+    return res.status(403).json({ mensaje: "Token inválido o expirado", err });
   }
 }

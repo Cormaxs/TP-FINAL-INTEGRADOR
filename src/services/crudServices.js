@@ -2,18 +2,21 @@ import { User } from "../models/fotografoModel.js"
 import {CustomError} from "../utils/crearError.js"
 
 export async function crearUserServices(datos) {
-    const {email} = datos;
-    console.log(`usuario a crear: ${datos}`)
+    const {email, numeroCelular} = datos;
     try { 
-        const emailExiste = await User.findOne({email});
-        if(emailExiste){
-            throw new CustomError(409, "El email ya está registrado"); // ✅ Detenemos el proceso
-        }
+        const existentes = await User.findOne({
+            $or:[
+            {email: email},
+           { numeroCelular: numeroCelular}
+        ]
+        });
+        if(existentes) return false;
+        
         const usuario = new User(datos);
         const usuarioGuardado = await usuario.save();
         return usuarioGuardado;
     } catch (error) {
-        console.error(err)
+       throw new CustomError(300, "error interno del servidor", error)
     }
 }
 
@@ -31,14 +34,16 @@ export async function buscarUserId(id) {
 
 export async function modificarUserId(data, id) {
     try {
-        const userActualizado = await User.updateOne(
-            //busqueda
-            { _id: id },
-            //datos actualizar
-            { $set: data }
-        );
+        const userActualizado = await User.findByIdAndUpdate(
+            id,
+            { $set: data },
+            { new: true } // <- devuelve el documento actualizado
+          )
+          .select('-password')
+          .select('-email')
+          .select('-__v');
         if (userActualizado) {
-            return true;
+            return userActualizado;
         } return false;
     } catch (err) {
         throw new CustomError(500, "error al actualizar los datos")
@@ -47,10 +52,10 @@ export async function modificarUserId(data, id) {
 
 export async function eliminarUserId(id) {
     try {
-        const eliminado = await User.deleteOne({ _id: id })
+        const eliminado = await User.findByIdAndDelete({ _id: id })
         if (eliminado) {
-            return true;
-        } return false;
+            return eliminado;
+        } return false
     } catch (err) {
         throw new CustomError(500, "error al eliminar usuario")
     }

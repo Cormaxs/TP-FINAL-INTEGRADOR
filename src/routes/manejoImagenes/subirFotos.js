@@ -1,13 +1,14 @@
 import express from 'express';
 import multer from 'multer';
-import { subirImagenPerfil, subirImagenPortada } from '../../controllers/subida-fotos-controller/perfil-portada.js';
+import {verificarToken} from "../../middleware/verificarToken.js"
+import { subirImagen } from '../../controllers/subida-fotos-controller/perfil-portada.js';
 
 export const fotos = express.Router();
 
-const upload = multer({dest: 'uploads/'})
-fotos.post('/perfil/:id', upload.single('perfil'), subirImagenPerfil);
-fotos.post('/portada/:id', upload.single('portada'), subirImagenPortada);
+const upload = multer({dest: 'uploads/', limits: '50mb'})
 
+//ruta dinamica para subir img perfil y portada, agregar un middleware de verificacion de token he id y recien permitir edicion
+fotos.post('/:tipo/:id',verificarToken, upload.single('imagen'), subirImagen);
 
 
 

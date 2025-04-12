@@ -4,10 +4,10 @@ const datoSchema = new mongoose.Schema({
   nombre: { type: String },
   email: { type: String, unique: true },
   fotos : {
-    perfil: {type: String},
-    portada: {type: String}
+    perfil: {type: String, default : "img"},
+    portada: {type: String, default: "img"}
   },
-  numeroCelular: {type: Number, unique: true},
+  numeroCelular: {type: Number},
   ubicacion: {type: String},
   cuentaVerificada: {type: Boolean, default: false},
   puntuacion: {type:Number},

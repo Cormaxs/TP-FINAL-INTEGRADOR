@@ -8,8 +8,8 @@ import dotenv from 'dotenv';
 
 
 dotenv.config();
-const app = express(); // Creamos una instancia de la app
-const PORT = 3000; // Puerto donde se va a levantar el servidor
+const app = express(); 
+const PORT = process.env.PORT || 3000; 
 app.use(express.json()); // Esto permite leer JSON en las rutas POST
 
 
