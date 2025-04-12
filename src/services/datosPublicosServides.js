@@ -1,49 +1,41 @@
 import {User} from "../models/fotografoModel.js"
-import {CustomError} from "../utils/crearError.js"
 
-//agregar las demas qerrys, si le paso vacio me devuelve todos los usuarios
 
 export async function buscadorSitioTodo(filtrosBusqueda = {}) {
-  let { page, limit, ...restoFiltros } = filtrosBusqueda;
-
-  // Asegurar que page y limit sean enteros positivos
-  page = parseInt(page);
-  limit = parseInt(limit);
-
-  if (isNaN(page) || isNaN(limit) || page < 1 || limit < 1) {
-    throw new CustomError(400, "Parámetros de paginación inválidos");
-  }
-
-  // Crear filtro dinámico para todos los campos string excepto paginación
-  const filtro = {};
-  for (const [campo, valor] of Object.entries(restoFiltros)) {
+  // 1. Extraer parámetros de paginación y otros filtros
+  const { page = 1, limit = 10, ...otrosFiltros } = filtrosBusqueda;
+  
+  // 2. Construir filtro de búsqueda para MongoDB
+  const filtroDB = {};
+  
+  // Solo procesar campos con valores de texto no vacíos
+  Object.entries(otrosFiltros).forEach(([campo, valor]) => {
     if (typeof valor === 'string' && valor.trim() !== '') {
-      filtro[campo] = { $regex: valor, $options: 'i' }; // búsqueda insensible a mayúsculas
+      filtroDB[campo] = { 
+        $regex: valor,       // Busca coincidencias parciales
+        $options: 'i'       // Ignora mayúsculas/minúsculas
+      };
     }
-  }
+  });
 
-  try {
-    const totalResultados = await User.countDocuments(filtro);
+  // 3. Ejecutar consulta con paginación
+  const [total, resultados] = await Promise.all([
+    User.countDocuments(filtroDB),                          // Contar total de documentos
+    User.find(filtroDB)                                    // Buscar documentos
+      .select('-password -email -__v')                     // Excluir campos sensibles
+      .skip((page - 1) * limit)                            // Saltar resultados anteriores
+      .limit(limit)                                        // Limitar por página
+  ]);
 
-    const resultados = await User.find(filtro)
-      .select('-password -email -__v') // excluir campos sensibles
-      .skip((page - 1) * limit)
-      .limit(limit);
-
-    const totalPaginas = Math.ceil(totalResultados / limit);
-
-    return {
-      page,
-      totalPages: totalPaginas,
-      totalResults: totalResultados,
-      anterior: page > 1 ? page - 1 : null,
-      siguiente: page < totalPaginas ? page + 1 : null,
-      resultados
-    };
-
-  } catch (err) {
-    console.error('Error en buscadorSitioTodo:');
-    throw err;
-  }
+  // 4. Calcular metadatos de paginación
+  const totalPaginas = Math.ceil(total / limit);
+  
+  return {
+    paginaActual: page,
+    totalPaginas,
+    totalResultados: total,
+    anterior: page > 1 ? page - 1 : null,
+    siguiente: page < totalPaginas ? page + 1 : null,
+    resultados
+  };
 }
-

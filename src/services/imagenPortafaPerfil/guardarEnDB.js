@@ -1,44 +1,20 @@
 import { User } from "../../models/fotografoModel.js"
 
-
-export async function guardarPerfilnDB(link, id) {
+//guarda img perfil - portada en DB
+  export const guardarEnDB = async (link, id, tipo) => {
     try {
-      // Buscar el usuario por ID
-      const guardar = await User.findById(id);
-  
-      if (guardar) {
-        // Asignar el link al campo fotos.perfil
-        guardar.fotos.perfil = link;
-  
-        // Guardar los cambios
-        await guardar.save();
-  
-        console.log("Imagen de perfil guardada correctamente.");
-      } else {
-        console.log("Usuario no encontrado.");
-      }
-    } catch (err) {
-      console.error("Error al guardar la imagen de perfil:", err);
-    }
-  }
+        const usuario = await User.findById(id);
+        if (!usuario) {
+            throw new Error('Usuario no encontrado');
+        }
 
-  export async function guardarPortadaDB(link, id) {
-    try {
-      // Buscar el usuario por ID
-      const guardar = await User.findById(id);
-  
-      if (guardar) {
-        // Asignar el link al campo fotos.perfil
-        guardar.fotos.portada = link;
-  
-        // Guardar los cambios
-        await guardar.save();
-  
-        console.log("Imagen de perfil guardada correctamente.");
-      } else {
-        console.log("Usuario no encontrado.");
-      }
-    } catch (err) {
-      console.error("Error al guardar la imagen de perfil:", err);
+        // Actualiza el campo correspondiente dinámicamente
+        usuario.fotos[tipo] = link;
+        await usuario.save();
+        
+        return true;
+    } catch (error) {
+        console.error(`Error al guardar imagen de ${tipo}:`, error);
+        throw error;
     }
-  }
+};
