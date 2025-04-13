@@ -1,21 +1,21 @@
 import mongoose from "mongoose";
 
 const datoSchema = new mongoose.Schema({
-  nombre: { type: String },
-  email: { type: String, unique: true },
+  nombre: { type: String, require: true },
+  email: { type: String, unique: true, require: true},
   fotos : {
     perfil: {type: String, default : "img"},
     portada: {type: String, default: "img"}
   },
-  numeroCelular: {type: Number},
-  ubicacion: {type: String},
+  numeroCelular: {type: Number, default: ""},
+  ubicacion: {type: String,  default: ""},
   cuentaVerificada: {type: Boolean, default: false},
-  puntuacion: {type:Number},
-  password: String,
-  rol: { type: String, default: "cliente" },       // Ej: "admin", "usuario", etc.
+  puntuacion: {type:Number,  default: "0"},
+  password:{ type: String, requiere: true},
+  rol: { type: String, default: "cliente", require: true },       // Ej: "admin", "usuario", etc.
   plan: { type: String, default: "gratuito" },      // Ej: "gratuito", "premium"
   estado: {type: Boolean, default: false},          //sesion activa o cerrada
-
+  termininos: {type:Boolean, require: true}
 
 });
 

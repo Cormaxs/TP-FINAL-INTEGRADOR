@@ -5,6 +5,7 @@ import {autenticaciones} from "./src/routes/auth.js";
 import {fotos} from "./src/routes/manejoImagenes/subirFotos.js";
 import { connectDB} from "./src/db/db.js"
 import dotenv from 'dotenv';
+import cors from "cors";
 
 
 dotenv.config();
@@ -14,7 +15,10 @@ app.use(express.json()); // Esto permite leer JSON en las rutas POST
 
 
 
-
+app.use(cors());
+app.use(cors({
+  origin: "*"// frontend
+}));
 app.use("/user", userRoutes);
 app.use("/publico", publico);
 app.use("/auth", autenticaciones)
@@ -29,5 +33,5 @@ connectDB();
 
 // Escuchamos el puerto
 app.listen(PORT, () => {
-  console.log(`Servidor escuchando en http://localhost:${PORT}`);
+  console.log(`Servidor escuchando en http://localhost:${PORT}/publico/buscador`);
 });
