@@ -5,8 +5,10 @@ export async function buscadorSitio(req, res){
   const filtrosBusqueda = {
     nombre: req.query.nombre , 
     ubicacion: req.query.ubicacion,
+    rol: req.query.rol,
     page: parseInt(req.query.page) ||  1,
     limit: parseInt(req.query.limit) ||  10,
+ 
   };
   try{
       const resultados = await buscadorSitioTodo(filtrosBusqueda)
