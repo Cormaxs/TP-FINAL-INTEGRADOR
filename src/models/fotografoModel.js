@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, {Schema} from "mongoose";
 
 const datoSchema = new mongoose.Schema({
   nombre: { type: String, require: true },
@@ -15,7 +15,14 @@ const datoSchema = new mongoose.Schema({
   rol: { type: String, default: "cliente", require: true },       // Ej: "admin", "usuario", etc.
   plan: { type: String, default: "gratuito" },      // Ej: "gratuito", "premium"
   estado: {type: Boolean, default: false},          //sesion activa o cerrada
-  termininos: {type:Boolean, require: true}
+  termininos: {type:Boolean, require: true},
+
+  //array de categorias que tiene el usuario
+  categorias: [{
+    categoria: { type: String, required: true },
+    imagenes: [{ type: String }]
+  }]
+  
 
 });
 

@@ -1,4 +1,4 @@
-import {User} from "../models/fotografoModel.js"
+import {User} from "../../models/fotografoModel.js"
 
 
 export async function buscadorSitioTodo(filtrosBusqueda = {}) {

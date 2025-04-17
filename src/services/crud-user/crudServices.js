@@ -1,5 +1,5 @@
-import { User } from "../models/fotografoModel.js"
-import {CustomError} from "../utils/crearError.js"
+import { User } from "../../models/fotografoModel.js"
+import {CustomError} from "../../utils/crearError.js"
 
 export async function crearUserServices(datos) {
     const {email, numeroCelular} = datos;

@@ -1,4 +1,4 @@
-import { buscadorSitioTodo} from "../services/datosPublicosServides.js"
+import { buscadorSitioTodo} from "../../services/datos-publicos/datosPublicosServides.js"
 
 
 export async function buscadorSitio(req, res){

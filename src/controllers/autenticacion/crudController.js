@@ -1,6 +1,6 @@
-import { encriptarPassword } from "../utils/bcrypt.js"
-import { crearUserServices, buscarUserId, modificarUserId, eliminarUserId } from "../services/crudServices.js"
-import { CustomError } from "../utils/crearError.js";
+import { encriptarPassword } from "../../utils/bcrypt.js"
+import { crearUserServices, buscarUserId, modificarUserId, eliminarUserId } from "../../services/crud-user/crudServices.js"
+import { CustomError } from "../../utils/crearError.js";
 
 export async function crearUsuario(req, res) {
     try {
