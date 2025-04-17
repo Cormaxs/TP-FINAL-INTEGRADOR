@@ -1,9 +1,9 @@
-import { compararPassword} from "../utils/bcrypt.js"
-import {User} from "../models/fotografoModel.js"
-import {crearToken} from "../utils/jwt.js"
+import { compararPassword} from "../../utils/bcrypt.js"
+import {User} from "../../models/fotografoModel.js"
+import {crearToken} from "../../utils/jwt.js"
 
 
-//inicia sesion verificando el token JWT
+//inicia sesion 
 export async function iniciarSesion(req, res) {
     const { email, password } = req.body;
     try {

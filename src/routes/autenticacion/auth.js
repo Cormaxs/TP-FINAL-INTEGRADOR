@@ -1,6 +1,6 @@
 import { Router } from "express";
-import {verificarToken} from "../middleware/verificarToken.js"
-import {iniciarSesion } from "../controllers/authControllers.js"
+import {verificarToken} from "../../middleware/verificarToken.js"
+import {iniciarSesion } from "../../controllers/autenticacion/authControllers.js"
 
 export const autenticaciones = Router();
   

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { buscadorSitio } from "../controllers/datosPublicosController.js"
+import { buscadorSitio } from "../../controllers/datos-publicos/datosPublicosController.js"
 
 
 export const publico = Router();
