@@ -1,6 +1,7 @@
 import { encriptarPassword } from "../../utils/bcrypt.js"
 import { crearUserServices, buscarUserId, modificarUserId, eliminarUserId } from "../../services/crud-user/crudServices.js"
 import { CustomError } from "../../utils/crearError.js";
+import { eliminarUsuarioCarpeta } from "../manejo-imagenes/crud-imagenes.js";
 
 export async function crearUsuario(req, res) {
     try {
@@ -56,6 +57,8 @@ export async function eliminarUsuario(req, res) {
     try {
         const eliminado = await eliminarUserId(id);
         if (eliminado) {
+            //eliminar carpeta de usuario
+            await eliminarUsuarioCarpeta(id)
             return res.status(201).send({ message: `usuario eliminado correctamente` });
         } 
         return res.status(400).send({ message: "Problemas al eliminar usuario" })

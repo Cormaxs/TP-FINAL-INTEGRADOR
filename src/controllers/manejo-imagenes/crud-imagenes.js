@@ -173,7 +173,6 @@ export const eliminarImagenCategoria = async (req, res) => {
 };
 
 
-
 // Elimina una categoría completa (DB + archivos)
 export const eliminarCategoria = async (req, res) => {
     const { id, categoria } = req.params;
@@ -221,5 +220,25 @@ export const eliminarCategoria = async (req, res) => {
             error: error.message,
             ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
         });
+    }
+};
+
+
+//elimina la carpeta del usuario y todos sus datos
+export const eliminarUsuarioCarpeta = async (id) => {
+
+    try {
+        // Ruta a la carpeta del usuario
+        const rutaUsuario = path.join(process.cwd(), 'imagenes', id);
+        
+        // Verificar si existe y eliminar recursivamente
+        await fs.access(rutaUsuario);
+        await fs.rm(rutaUsuario, { recursive: true, force: true });
+        
+        return true;
+
+    } catch (error) {
+        console.error(`Error eliminando carpeta del usuario ${id}:`, error);
+        
     }
 };
