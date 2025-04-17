@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import {verificarToken} from "../../middleware/verificarToken.js"
+import {verificarToken} from "../../middleware/token/verificarToken.js"
 import { subirImagen, subirImagenCategoria, eliminarImagenCategoria, eliminarCategoria } from '../../controllers/manejo-imagenes/crud-imagenes.js';
 import { sanitizarDatos } from '../../middleware/subidaImagenes/validacionesImg.js';
 
@@ -15,13 +15,13 @@ const upload = multer({
   });
 
 //ruta dinamica para subir img perfil y portada, agregar un middleware de verificacion de token he id y recien permitir edicion
-fotos.post('/:tipo/:id', upload.single('imagen'), subirImagen);
+fotos.post('/:tipo/:id',verificarToken, upload.single('imagen'), subirImagen);
 
 //sube imagenes a la categoria
-fotos.post("/categorias/:categoria/:id",sanitizarDatos, upload.array('imagenes', 5), subirImagenCategoria)
+fotos.post("/categorias/:categoria/:id",verificarToken, sanitizarDatos, upload.array('imagenes', 5), subirImagenCategoria)
 
 
-fotos.delete("/categorias/:categoria/:id/:imagen",sanitizarDatos, eliminarImagenCategoria)
+fotos.delete("/categorias/:categoria/:id/:imagen",verificarToken, sanitizarDatos, eliminarImagenCategoria)
 
 //agregar eliminar categoria
-fotos.delete("/categorias/:categoria/:id",sanitizarDatos, eliminarCategoria);
+fotos.delete("/categorias/:categoria/:id",verificarToken, sanitizarDatos, eliminarCategoria);
