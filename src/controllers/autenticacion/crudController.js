@@ -2,6 +2,7 @@ import { encriptarPassword } from "../../utils/bcrypt.js"
 import { crearUserServices, buscarUserId, modificarUserId, eliminarUserId } from "../../services/crud-user/crudServices.js"
 import { CustomError } from "../../utils/crearError.js";
 import { eliminarUsuarioCarpeta } from "../manejo-imagenes/crud-imagenes.js";
+import { verificarCorreo } from "./verificarCorreo.js";
 
 export async function crearUsuario(req, res) {
     try {
@@ -12,12 +13,14 @@ export async function crearUsuario(req, res) {
         
         const resultado = await crearUserServices(datos);
         if (resultado) {
+            
+            verificarCorreo(datos, resultado.id)
             return res.status(201).json({message: "usuario creado correctamente"});
         }
         return res.status(300).json({message: "El correo o numero de telefono ya estan en uso"})
 
     } catch (error) {
-        // Respondemos con un error genérico para el cliente
+       
         throw new CustomError(500, "Error interno al crear el usuario");
     }
 }

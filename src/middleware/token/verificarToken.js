@@ -34,3 +34,9 @@ export function verificarRol(rolesRequeridos = []) {
       next();
   };
 }
+
+
+export function verificarAdmin(req, res, next){
+  const {rol} = req.usuario;
+  if(rol == 'admin') return next()
+}

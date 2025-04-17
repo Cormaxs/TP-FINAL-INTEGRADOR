@@ -25,6 +25,7 @@ export const validarUsuario = [
 //verifica los campos vacios y pasa los que no lo estan
 export const datosActualizar = (req, res, next) => {
   const datos = req.body;
+  const {rol} = req.usuario;
 
   const datosFiltrados = Object.fromEntries(
     Object.entries(datos).filter(
@@ -35,6 +36,8 @@ export const datosActualizar = (req, res, next) => {
   if (Object.keys(datosFiltrados).length === 0) {
     return res.status(400).json({ message: "No se enviaron datos válidos para actualizar." });
   }
+  //solo cuando ya sea admin dejo que cambie la casilla de admin
+  if( datosFiltrados.rol === 'admin' && rol !== datosFiltrados.rol) return res.status(400).json({message: "No posee permisos de administrador"})
 
   req.body = datosFiltrados; // Reemplazamos por los datos limpios
   next(); // Pasamos al siguiente middleware o controlador
