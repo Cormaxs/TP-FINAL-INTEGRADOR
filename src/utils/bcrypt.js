@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import {CustomError} from "./crearError.js";
+import { coleccionErrores } from "../middleware/manejoDeErrores/coleccion-errores.js";
 
 //devuelve hash
 export async function encriptarPassword(password){
@@ -7,7 +7,7 @@ export async function encriptarPassword(password){
     const hash = await bcrypt.hash(password, saltRounds);
       return hash;
       }catch(err){
-          throw new CustomError(500, "no se pudo hashear")
+          throw coleccionErrores.failHash(err)
         }
 }
 
@@ -18,8 +18,7 @@ export async function compararPassword(password, hash) {
       return value;
     }return value;
     } catch (error) {
-      console.error("Error al comparar password:", error.message);
-      throw new CustomError(500, "error en la comparacion del hash")
+      throw coleccionErrores.compareHashError(error)
     }
   }
   

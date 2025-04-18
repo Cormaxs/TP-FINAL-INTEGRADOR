@@ -1,7 +1,8 @@
 import { Router } from "express";
 import {verificarToken, verificarRol} from "../../middleware/token/verificarToken.js"
 import {iniciarSesion } from "../../controllers/autenticacion/authControllers.js"
-import { verificarCuenta } from "../../controllers/autenticacion/verificarCorreo.js";
+import { verificarCuenta } from "../../controllers/autenticacion/correo/verificarCorreo.js";
+import { recuperarPassword, cambiarContraseña } from "../../controllers/autenticacion/correo/recuperarContraseña.js";
 
 export const autenticaciones = Router();
   
@@ -20,4 +21,9 @@ autenticaciones.post("/sesion", verificarToken,verificarRol(['client', 'photogra
 })
 
 //verificar cuenta correo
-autenticaciones.put("/correo/:id", verificarCuenta)
+autenticaciones.get("/correo/:id", verificarCuenta)
+
+//recuperar contraseña, paso correo por body desde front
+autenticaciones.post("/recuperarPassword", recuperarPassword)
+//cambia la contraseña desde el frontend
+autenticaciones.post("/actualizarPassword", cambiarContraseña)

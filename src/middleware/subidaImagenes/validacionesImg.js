@@ -1,6 +1,4 @@
 
-
-
 export function sanitizarDatos(req, res, next) {
     try {
       // Normalizamos la categoría: sin espacios alrededor y en minúsculas
@@ -9,7 +7,6 @@ export function sanitizarDatos(req, res, next) {
       }
       next(); // sigue con el siguiente middleware o controlador
     } catch (err) {
-      console.error("Error al sanitizar los datos:", err);
       res.status(500).json({ mensaje: "Error al procesar los datos" });
     }
   }

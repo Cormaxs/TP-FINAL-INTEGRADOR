@@ -6,7 +6,6 @@ import {crearToken} from "../../utils/jwt.js"
 //inicia sesion 
 export async function iniciarSesion(req, res) {
     const { email, password } = req.body;
-    try {
       const usuario = await User.findOne({ email});
       if(!usuario) return res.status(404).json({message: "Los datos ingresados no coinciden" });
       const esValida = await compararPassword(password, usuario.password);
@@ -23,9 +22,6 @@ export async function iniciarSesion(req, res) {
           }
         });
       }
-    } catch (error) {
-      res.status(500).json({message: "Error en el servidor", error})
-    }
   }
 
 
