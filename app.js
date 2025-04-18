@@ -4,6 +4,7 @@ import { publico } from "./src/routes/publicas/datosPublicos.js";
 import {autenticaciones} from "./src/routes/autenticacion/auth.js";
 import {fotos} from "./src/routes/manejoImagenes/subirFotos.js";
 import { connectDB} from "./src/db/db.js"
+import { errorHandler } from "./src/middleware/manejoDeErrores/global-errores.js";
 import dotenv from 'dotenv';
 import cors from "cors";
 
@@ -26,6 +27,8 @@ app.use("/archivos", fotos);
 
 // Esto permite acceder a las imágenes desde el navegador
 app.use('/imagenes', express.static('imagenes'));
+
+app.use(errorHandler)
 connectDB();
 
 

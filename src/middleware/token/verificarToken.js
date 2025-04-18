@@ -12,7 +12,6 @@ export function verificarToken(req, res, next) {
   try {
     const decoded = jwt.verify(token, SECRET_KEY); //  Valida firma y expiración
     req.usuario = decoded; // Guarda datos útiles en el request
-    //console.log(req.usuario)
     next(); // Sigue al siguiente middleware o controlador
   } catch (err) {
     return res.status(403).json({ mensaje: "Token inválido o expirado", err });

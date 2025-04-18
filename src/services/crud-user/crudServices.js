@@ -1,5 +1,5 @@
 import { User } from "../../models/fotografoModel.js"
-import {CustomError} from "../../utils/crearError.js"
+import { coleccionErrores } from "../../middleware/manejoDeErrores/coleccion-errores.js";
 
 export async function crearUserServices(datos) {
     const {email, numeroCelular} = datos;
@@ -16,19 +16,17 @@ export async function crearUserServices(datos) {
         const usuarioGuardado = await usuario.save();
         return usuarioGuardado;
     } catch (error) {
-       throw new CustomError(300, "error interno del servidor", error)
+       throw coleccionErrores.errorCrearUser(error) 
     }
 }
 
 export async function buscarUserId(id) {
     try {
-        const usuario = await User.findById(id)
-        .select('-password')
-        .select('-email')
-        .select('-__v');
+        const usuario = await User.findOne({_id:id})
+        .select('-password -email ');
         return usuario; // puede ser null si no existe
     } catch (err) {
-        throw new CustomError(404, "Error al buscar usuario por ID:"); // relanzamos para que el controller lo pueda manejar
+        throw coleccionErrores.idNoEncontrado(id) 
     }
 }
 
@@ -39,14 +37,11 @@ export async function modificarUserId(data, id) {
             { $set: data },
             { new: true } // <- devuelve el documento actualizado
           )
-          .select('-password')
-          .select('-email')
-          .select('-__v');
-        if (userActualizado) {
-            return userActualizado;
-        } return false;
+          .select('-password -email __v');
+        if (userActualizado) return userActualizado;
+        return false;
     } catch (err) {
-        throw new CustomError(500, "error al actualizar los datos")
+        throw coleccionErrores.errUpdateDates(err)
     }
 }
 
@@ -57,6 +52,6 @@ export async function eliminarUserId(id) {
             return eliminado;
         } return false
     } catch (err) {
-        throw new CustomError(500, "error al eliminar usuario")
+        throw coleccionErrores.errDeleteUser(err)
     }
 }

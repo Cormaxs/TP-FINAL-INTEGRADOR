@@ -1,13 +1,13 @@
 import {User} from "../../models/fotografoModel.js"
+import { coleccionErrores } from "../../middleware/manejoDeErrores/coleccion-errores.js";
 
 
 export async function buscadorSitioTodo(filtrosBusqueda = {}) {
-  // 1. Extraer parámetros de paginación y otros filtros
+  // Extraer parámetros de paginación y otros filtros
   const { page = 1, limit = 10, ...otrosFiltros } = filtrosBusqueda;
-  
-  // 2. Construir filtro de búsqueda para MongoDB
+  // Construir filtro de búsqueda para MongoDB
   const filtroDB = {};
-  
+  try{
   // Solo procesar campos con valores de texto no vacíos
   Object.entries(otrosFiltros).forEach(([campo, valor]) => {
     if (typeof valor === 'string' && valor.trim() !== '') {
@@ -18,7 +18,7 @@ export async function buscadorSitioTodo(filtrosBusqueda = {}) {
     }
   });
 
-  // 3. Ejecutar consulta con paginación
+  //Ejecutar consulta con paginación
   const [total, resultados] = await Promise.all([
     User.countDocuments(filtroDB),                          // Contar total de documentos
     User.find(filtroDB)                                    // Buscar documentos
@@ -27,7 +27,7 @@ export async function buscadorSitioTodo(filtrosBusqueda = {}) {
       .limit(limit)                                        // Limitar por página
   ]);
 
-  // 4. Calcular metadatos de paginación
+  // Calcular metadatos de paginación
   const totalPaginas = Math.ceil(total / limit);
   
   return {
@@ -38,4 +38,7 @@ export async function buscadorSitioTodo(filtrosBusqueda = {}) {
     siguiente: page < totalPaginas ? page + 1 : null,
     resultados
   };
+}catch(err){
+  throw coleccionErrores.errorBusqueda(err);
+}
 }
