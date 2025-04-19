@@ -19,8 +19,9 @@ const datoSchema = new mongoose.Schema({
 
   //array de categorias que tiene el usuario
   categorias: [{
-    categoria: { type: String, required: true },
-    imagenes: [{ type: String }]
+    categoria: { type: String},
+    imagenes: [{ type: String }],
+    precio: {type: Number}
   }]
   
 

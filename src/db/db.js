@@ -7,8 +7,6 @@ export const connectDB = async () => {
   try {
     await mongoose.connect(uri, {
       dbName: "tp_final_nodo",
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
     });
     console.log("✅ Conectado a MongoDB correctamente");
   } catch (error) {

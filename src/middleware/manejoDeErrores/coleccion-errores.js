@@ -24,6 +24,12 @@ export const coleccionErrores = {
   errUpdatePassword: (error) => new CustomError(405, "Cuenta inexistente, no se pudo actualizar password", error),
 
   errEnvCorreo:(error) => new CustomError("Error al enviar correo en el servidor", error),
+
+  errAlGuardarImagen: (error, img = " ") => new CustomError(`Error ${error} al guardar la imagen ${img}`),
+
+  categoriaNotFound: (err = "no encontrada", categoria) => new CustomError(`Categoria ${categoria} no encontrada ERROR : ${err}`),
+
+  errDeleteIMG: (err) => new CustomError("error al eliminar la imagen", err),
   
 }
 
