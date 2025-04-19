@@ -60,8 +60,6 @@ npm run dev
 
 ## 📁 Estructura de Rutas
 
- [Ver ejemplos de usos](#ejemplos-de-uso)
-
 ### 1. `routes/autenticacion/crudUser.js`  
 Ruta base: `/user`  
 Maneja operaciones CRUD para usuarios.
@@ -145,7 +143,9 @@ Maneja la subida de fotos y mas adelante archivos de otro tipo.
 }
 ```
 
-# EJEMPLOS DE USOS - ENDPOINTS {#ejemplos-de-uso}
+---
+
+# EJEMPLOS DE USOS - ENDPOINTS 
 
 
 ### 1. `routes/autenticacion/crudUser.js`  
@@ -162,20 +162,26 @@ Lo minimo necesario para crear un usuario es:
       "rol": "client - photographer - admin"
    }
 ```
+
+---
+
 **GET**
 para obtener el usuario por su id, cualquiera puede obtenerlo
 ```bash
    /user/:id
 ```
 
+---
+
 **PUT**
 Modifica los datos por id, si mandamos datos vacios el middleware los filtra y solo actualiza los que no estan vacios
 ```bash
    /user/modificar/:id
 ```
-## REQUERIMIENTOS
-✔ **pasar Bearer por body**
+**REQUERIMIENTOS**
+✔ **pasar Bearer por body `key : Authorization`**
 
+---
 
 **DELETE**
 Elimina usuario, solo el mismo usuario o el admin puede eliminarlo.
@@ -183,10 +189,10 @@ Al borrar el usuario, todas las fotos y datos del mismo desaparecen
 ```bash
    /user/eliminar/:id
 ```
-## REQUERIMIENTOS
-✔ **pasar Bearer por body**
+**REQUERIMIENTOS**
+✔ **pasar Bearer por body `key : Authorization`**
 
-
+---
 
 ### 2. `routes/publicas/datosPublicos.js`  
 **GET**
@@ -194,6 +200,8 @@ Busca usuarios por filtros, si no se ponen filtros trae todos, usando paginacion
 ```bash
    /publico/buscador?nombre=ejemplo&ubicacion=ninguna&rol=client&page=2&limit=10
 ```
+
+---
 
 ### 3. `routes/autenticacion/auth.js`  
 
@@ -211,23 +219,27 @@ solo requiere email y contraseña desde el body
    }
 ```
 
+---
+
 **POST**
   Cierra sesion de la cuenta especifica
 ```bash
    /auth/lagout/:id
 ```
-## REQUERIMIENTOS
-✔ **pasar Bearer por body**
+**REQUERIMIENTOS**
+✔ **pasar Bearer por body `key : Authorization`**
 
+---
 
 **POST**
   Verifica si la sesion esta iniciada, se pone true o false en db
 ```bash
    /auth/sesion/:id
 ```
-## REQUERIMIENTOS
-✔ **pasar Bearer por body**
+**REQUERIMIENTOS**
+✔ **pasar Bearer por body `key : Authorization`**
 
+---
 
 **GET**
   Verificacion desde el gmail, cambia el estado de cuentaverificada a true y devuelve cuenta verificada
@@ -235,6 +247,7 @@ solo requiere email y contraseña desde el body
    /auth/correo/:id
 ```
 
+---
 
 **POST**
   Pasando el correo del usuario en el body, envia un correo que lo lleva a un formulario para cambiar la contraseña
@@ -242,6 +255,7 @@ solo requiere email y contraseña desde el body
    /auth/recuperarPassword
 ```
 
+---
 
 **POST**
   Recibe los datos del formulario de recuperar contraseña, requiere el email del usuario y la nueva contraseña
@@ -249,6 +263,7 @@ solo requiere email y contraseña desde el body
    /auth/actualizarPassword
 ```
 
+---
 
 ### 4. `routes/manejoImagenes/subirFotos.js` 
 
@@ -257,41 +272,92 @@ solo requiere email y contraseña desde el body
 ```bash
    /archivos/:tipo/:id
 ```
-## REQUERIMIENTOS
-✔ **pasar Bearer por body**
+**REQUERIMIENTOS**
+✔ **pasar Bearer por body `key : Authorization`**
 
+---
 
 **POST**
  Sube las imagenes a la categoria determinada, debo pasar `:categoria` : `bodas o la que gustes`, se pueden subir 5 maximas por categorias y no permite categorias repetidas, solo pueden usarlas los fotografos y admin
 ```bash
    /archivos/categorias/:categoria/:id
 ```
-## REQUERIMIENTOS
-✔ **pasar Bearer por body**
+**REQUERIMIENTOS**
+✔ **pasar Bearer por body `key : Authorization`**
 
+---
 
 **POST**
  Sube las imagenes a la categoria determinada, debo pasar `:categoria` : `bodas o la que gustes`, se pueden subir 5 maximas por categorias y no permite categorias repetidas
 ```bash
    /archivos/categorias/:categoria/:id
 ```
-## REQUERIMIENTOS
-✔ **pasar Bearer por body**
+**REQUERIMIENTOS**
+✔ **pasar Bearer por body `key : Authorization`**
 
-
+---
 
 **DELETE**
 Elimina una imagen especifica de la categoria, en `:imagen` : `nombre-imagen.webp`
 ```bash
    /archivos/categorias/:categoria/:id/:imagen
 ```
-## REQUERIMIENTOS
-✔ **pasar Bearer por body**
+**REQUERIMIENTOS**
+✔ **pasar Bearer por body `key : Authorization`**
+
+---
 
 **DELETE**
 Elimina una categoria especifica de las categorias del usaurio, en `:categoria` : `nombre-categoria`
 ```bash
    /archivos/categorias/categorias/:categoria/:id
 ```
-## REQUERIMIENTOS
-✔ **pasar Bearer por body**
+**REQUERIMIENTOS**
+✔ **pasar Bearer por body `key : Authorization`**
+
+---
+
+
+## 🛠 Tecnologías Utilizadas
+
+### **Backend (Dependencias)**
+
+| Tecnología           | Versión       | Propósito                              |
+|----------------------|---------------|----------------------------------------|
+| [Node.js](#)         | `18.x+`       | Entorno de ejecución JavaScript        |
+| [Express](#)         | `^5.1.0`      | Framework para el servidor web         |
+| [Mongoose](#)        | `^8.13.2`     | ODM para MongoDB                       |
+| [JSON Web Token](#)  | `^9.0.2`      | Autenticación vía JWT                  |
+| [Bcrypt](#)          | `^5.1.1`      | Encriptación de contraseñas            |
+| [CORS](#)            | `^2.8.5`      | Manejo de políticas CORS               |
+| [Dotenv](#)          | `^16.4.7`     | Gestión de variables de entorno        |
+| [Express Validator](#)| `^7.2.1`      | Validación de datos en endpoints       |
+| [Multer](#)          | `^1.4.5-lts.2`| Manejo de uploads de archivos          |
+| [Nodemailer](#)      | `^6.10.1`     | Envío de emails                        |
+| [fs-extra](#)        | `^11.3.0`     | Mejoras al módulo `fs` de Node         |
+
+
+---
+
+## .ENV VARIABLES
+
+```bash
+#para la encriptacion y jwt
+SECRET_KEY=
+#coneccion a mongodb
+URI=
+#puerto en que va a correr
+PORT=3000
+#donde esta desplegado el backend
+BASE_URL=
+#roles admitidos
+ROLES=['client', 'photographer', 'admin']
+
+
+#para usar con nodemailer
+CORREO=
+#contraseña comun de acceso
+PASSWORDCORREO=
+#servicio smtps recomendado para correos seguros 465
+SERVICE_MAIL=
+```
