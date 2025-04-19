@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {verificarToken, verificarRol} from "../../middleware/token/verificarToken.js"
+import {verificarToken} from "../../middleware/token/verificarToken.js"
 import {iniciarSesion } from "../../controllers/autenticacion/authControllers.js"
 import { verificarCuenta } from "../../controllers/autenticacion/correo/verificarCorreo.js";
 import { recuperarPassword, cambiarContraseña } from "../../controllers/autenticacion/correo/recuperarContraseña.js";
@@ -11,12 +11,12 @@ autenticaciones.post("/login", iniciarSesion);
 
 
 //cierre de sesion, invalida el token y cambia de estado de sesion activa a false
-autenticaciones.post("/lagout", verificarToken, verificarRol(['client', 'photographer', 'admin']), (req, res)=>{
+autenticaciones.post("/lagout/:id", verificarToken, (req, res)=>{
     res.send("cerrado")
 })
 
 //ruta protegida, mantiene sesion activa
-autenticaciones.post("/sesion", verificarToken,verificarRol(['client', 'photographer', 'admin']), (req, res)=>{
+autenticaciones.post("/sesion/:id", verificarToken, (req, res)=>{
     res.send("estas activo")
 })
 

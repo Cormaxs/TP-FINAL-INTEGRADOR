@@ -2,7 +2,7 @@ import { promises as fs } from 'fs';
 import path, { join }  from 'path';
 import { guardarEnDB, agregarImgCategoria, eliminarCategoriaDB, eliminarFotosCategoria } from '../../services/imagenPortafaPerfil/guardarEnDB.js';
 import { crearUserID } from '../crearCarpetas/crearCarpetas.js';
-import { CustomError } from '../../utils/crearError.js';
+import { coleccionErrores } from '../../middleware/manejoDeErrores/coleccion-errores.js';
 
 
 const rootDir = process.cwd();
@@ -31,7 +31,7 @@ export const subirImagen = async (req, res) => {
             rutaLocal: rutaRelativa
         });
     } catch (error) {
-        throw new CustomError(500, "Error al guardar imagen", err)
+        throw coleccionErrores.errAlGuardarImagen(error)
     }
 };
 

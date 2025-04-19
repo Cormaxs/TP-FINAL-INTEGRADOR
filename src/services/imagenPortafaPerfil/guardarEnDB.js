@@ -1,21 +1,17 @@
 import { User } from "../../models/fotografoModel.js"
+import { coleccionErrores } from "../../middleware/manejoDeErrores/coleccion-errores.js"; 
+
 
 //guarda link img perfil - portada en DB
   export const guardarEnDB = async (link, id, tipo) => {
     try {
         const usuario = await User.findById(id);
-        if (!usuario) {
-            throw new Error('Usuario no encontrado');
-        }
-
-        // Actualiza el campo correspondiente dinámicamente
-        usuario.fotos[tipo] = link;
+        if (!usuario) throw coleccionErrores.idNoEncontrado(id);
+        usuario.fotos[tipo] = link;   // Actualiza el campo correspondiente dinámicamente
         await usuario.save();
-        
         return true;
     } catch (error) {
-        console.error(`Error al guardar imagen de ${tipo}:`, error);
-        throw error;
+        throw coleccionErrores.errAlGuardarImagen(error, tipo)
     }
 };
 
@@ -26,7 +22,7 @@ export async function agregarImgCategoria(idUser, nombreCategoria, imagenes) {
     try {
       //Validar usuario
       const usuario = await User.findById(idUser);
-      if (!usuario) throw new Error('Usuario no encontrado');
+      if (!usuario) throw coleccionErrores.idNoEncontrado(idUser);
   
       //Procesar imágenes (eliminar duplicados)
       const imagenesUnicas = [...new Set(imagenes)];
@@ -58,11 +54,7 @@ export async function agregarImgCategoria(idUser, nombreCategoria, imagenes) {
       };
   
     } catch (error) {
-      console.error('Error en agregarImgCategoria:', error);
-      return {
-        success: false,
-        error: error.message
-      };
+      throw coleccionErrores.errAlGuardarImagen(error)
     }
   }
 
@@ -72,9 +64,7 @@ export async function agregarImgCategoria(idUser, nombreCategoria, imagenes) {
     try {
         // Validar usuario
         const usuario = await User.findById(idUser);
-        if (!usuario) {
-            return { success: false, error: 'Usuario no encontrado' };
-        }
+        if (!usuario) throw coleccionErrores.idNoEncontrado(idUser)
 
         // Normalizar nombre de categoría
         const nombreCategoriaNormalizado = nombreCategoria.toLowerCase();
@@ -84,14 +74,12 @@ export async function agregarImgCategoria(idUser, nombreCategoria, imagenes) {
             c => c.categoria && c.categoria.toLowerCase() === nombreCategoriaNormalizado
         );
 
-        if (!categoria) {
-            return { success: false, error: 'Categoría no encontrada' };
-        }
-
+        if (!categoria) throw coleccionErrores.categoriaNotFound(categoria)
+          
         // Extraer solo los nombres de archivo para comparación
         const nombresArchivosAEliminar = imagenesAEliminar.map(url => {
             try {
-                return url.split('/').pop(); // Extrae "fili.jpg" de la URL
+                return url.split('/').pop(); // Extrae nombre img  de la URL
             } catch {
                 return url;
             }
@@ -118,34 +106,22 @@ export async function agregarImgCategoria(idUser, nombreCategoria, imagenes) {
             }
         };
 
-    } catch (error) {
-        console.error('Error en eliminarFotosCategoria:', error);
-        return {
-            success: false,
-            error: error.message
-        };
-    }
+    } catch (error) {  throw coleccionErrores.errDeleteIMG(error) }
 }
 
 
 export async function eliminarCategoriaDB(userId, categoryName) {
-  if (!userId || !categoryName) {
-      throw new Error('ID de usuario y nombre de categoría son requeridos');
-  }
 
   const usuario = await User.findById(userId);
-  if (!usuario) {
-      throw new Error('Usuario no encontrado');
-  }
+  if (!usuario) throw coleccionErrores.idNoEncontrado(userId)
 
   const initialCount = usuario.categorias.length;
   usuario.categorias = usuario.categorias.filter(
       cat => cat.categoria.toLowerCase() !== categoryName.toLowerCase()
   );
 
-  if (usuario.categorias.length === initialCount) {
-      throw new Error('Categoría no encontrada en el usuario');
-  }
+  if (usuario.categorias.length === initialCount) throw coleccionErrores.categoriaNotFound(usuario.categorias)
+  
 
   await usuario.save();
 
