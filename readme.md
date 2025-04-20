@@ -1,26 +1,25 @@
 # TP FINAL - Plataforma Web para Fotógrafos 📸  
 
 **Nodo Tecnológico - Proyecto Integrador - FOTOGRAFOS**
-
 Este proyecto es una plataforma web donde los fotógrafos pueden subir su trabajo y los usuarios pueden contactarlos. Se desarrolló aplicando todo lo aprendido durante la cursada, utilizando la arquitectura **MVC**.
 
 ---
 
 ## INSTALACION
 
-1. **`Clonar el repositorio:`**
+**`Clonar el repositorio:`**
 
 ```bash
 git clone [https://github.com/Cormaxs/TP-FINAL-INTEGRADOR.git]
 ```
 
-2. **`Instala las dependencias:`**
+**`Instala las dependencias:`**
 
 ```bash
 npm install
 ```
 
-3. **`Inicia el servidor:`**
+**`Inicia el servidor:`**
 
 ```bash
 npm run dev
@@ -56,7 +55,8 @@ npm run dev
 
 ## 🌐 Recorrido de una solicitud típica
 
-**Cliente → app.js → routes → middlewares → controllers → services → models/db**
+flowchart LR
+    Cliente --> app.js --> Routes --> Middlewares --> Controllers --> Services --> Models/DB
 
 ---
 
@@ -129,13 +129,10 @@ Maneja la subida de fotos y mas adelante archivos de otro tipo.
 
 ---
 
-# formato de errores
-
 ## los mensajes de error deben tener minimo el codigo de error y el mensaje
 
 ```bash
 {
-  "ok": false,
   "error": {
     "code": 400,
     "message": "El campo 'email' es obligatorio.",
@@ -146,16 +143,15 @@ Maneja la subida de fotos y mas adelante archivos de otro tipo.
       }
     ]
   }
-}
 ```
 
 ---
 
-# EJEMPLOS DE USOS - ENDPOINTS
+## EJEMPLOS DE USOS - ENDPOINTS
 
-### 1. `routes/autenticacion/crudUser.js`  
+### `routes/autenticacion/crudUser.js`
 
-**POST**
+**`POST`**
 
 ```bash
    /user/register
@@ -173,7 +169,7 @@ Lo minimo necesario para crear un usuario es:
 
 ---
 
-**GET**
+**`GET`**
 para obtener el usuario por su id, cualquiera puede obtenerlo
 
 ```bash
@@ -182,7 +178,7 @@ para obtener el usuario por su id, cualquiera puede obtenerlo
 
 ---
 
-**PUT**
+**`PUT`**
 Modifica los datos por id, si mandamos datos vacios el middleware los filtra y solo actualiza los que no estan vacios
 
 ```bash
@@ -190,12 +186,11 @@ Modifica los datos por id, si mandamos datos vacios el middleware los filtra y s
 ```
 
 **REQUERIMIENTOS**
-
-✔ **pasar Bearer por body `key : Authorization`**
+Authorization: Bearer <token_jwt>
 
 ---
 
-**DELETE**
+**`DELETE`**
 Elimina usuario, solo el mismo usuario o el admin puede eliminarlo.
 Al borrar el usuario, todas las fotos y datos del mismo desaparecen
 
@@ -204,14 +199,13 @@ Al borrar el usuario, todas las fotos y datos del mismo desaparecen
 ```
 
 **REQUERIMIENTOS**
-
-✔ **pasar Bearer por body `key : Authorization`**
+Authorization: Bearer <token_jwt>
 
 ---
 
-### 2. `routes/publicas/datosPublicos.js`  
+### `routes/publicas/datosPublicos.js`  
 
-**GET**
+**`GET`**
 Busca usuarios por filtros, si no se ponen filtros trae todos, usando paginacion para traer solo 10 de la pagina 1, si no paso algun parametro, simplemente lo ignora y busca coincidencias de los demas, ademas ignora datos como el correo y contraseña
 
 ```bash
@@ -220,9 +214,9 @@ Busca usuarios por filtros, si no se ponen filtros trae todos, usando paginacion
 
 ---
 
-### 3. `routes/autenticacion/auth.js`  
+### `routes/autenticacion/auth.js`  
 
-**POST**
+**`POST`**
    Inicia sesion
 
 ```bash
@@ -240,7 +234,7 @@ solo requiere email y contraseña desde el body
 
 ---
 
-**POST**
+**`POST`**
   Cierra sesion de la cuenta especifica
 
 ```bash
@@ -248,12 +242,11 @@ solo requiere email y contraseña desde el body
 ```
 
 **REQUERIMIENTOS**
-
-✔ **pasar Bearer por body `key : Authorization`**
+Authorization: Bearer <token_jwt>
 
 ---
 
-**POST**
+**`POST`**
   Verifica si la sesion esta iniciada, se pone true o false en db
 
 ```bash
@@ -261,12 +254,11 @@ solo requiere email y contraseña desde el body
 ```
 
 **REQUERIMIENTOS**
-
-✔ **pasar Bearer por body `key : Authorization`**
+Authorization: Bearer <token_jwt>
 
 ---
 
-**GET**
+**`GET`**
   Verificacion desde el gmail, cambia el estado de cuentaverificada a true y devuelve cuenta verificada
 
 ```bash
@@ -275,7 +267,7 @@ solo requiere email y contraseña desde el body
 
 ---
 
-**POST**
+**`POST`**
   Pasando el correo del usuario en el body, envia un correo que lo lleva a un formulario para cambiar la contraseña
 
 ```bash
@@ -284,7 +276,7 @@ solo requiere email y contraseña desde el body
 
 ---
 
-**POST**
+**`POST`**
   Recibe los datos del formulario de recuperar contraseña, requiere el email del usuario y la nueva contraseña
 
 ```bash
@@ -293,9 +285,9 @@ solo requiere email y contraseña desde el body
 
 ---
 
-### 4. `routes/manejoImagenes/subirFotos.js`
+### `routes/manejoImagenes/subirFotos.js`
 
-**POST**
+**`POST`**
  Sube la foto de perfil o portada (de a 1), en `tipo` : `perfil o portada`, en el body debemos pasarla como form-data y en `key` : `imagen`
 
 ```bash
@@ -303,12 +295,11 @@ solo requiere email y contraseña desde el body
 ```
 
 **REQUERIMIENTOS**
-
-✔ **pasar Bearer por body `key : Authorization`**
+Authorization: Bearer <token_jwt>
 
 ---
 
-**POST**
+**`POST`**
  Sube las imagenes a la categoria determinada, debo pasar `:categoria` : `bodas o la que gustes`, se pueden subir 5 maximas por categorias y no permite categorias repetidas, solo pueden usarlas los fotografos y admin
 
 ```bash
@@ -316,12 +307,11 @@ solo requiere email y contraseña desde el body
 ```
 
 **REQUERIMIENTOS**
-
-✔ **pasar Bearer por body `key : Authorization`**
+Authorization: Bearer <token_jwt>
 
 ---
 
-**POST**
+**`POST`**
  Sube las imagenes a la categoria determinada, debo pasar `:categoria` : `bodas o la que gustes`, se pueden subir 5 maximas por categorias y no permite categorias repetidas
 
 ```bash
@@ -329,12 +319,11 @@ solo requiere email y contraseña desde el body
 ```
 
 **REQUERIMIENTOS**
-
-✔ **pasar Bearer por body `key : Authorization`**
+Authorization: Bearer <token_jwt>
 
 ---
 
-**DELETE**
+**`DELETE`**
 Elimina una imagen especifica de la categoria, en `:imagen` : `nombre-imagen.webp`
 
 ```bash
@@ -342,12 +331,11 @@ Elimina una imagen especifica de la categoria, en `:imagen` : `nombre-imagen.web
 ```
 
 **REQUERIMIENTOS**
-
-✔ **pasar Bearer por body `key : Authorization`**
+Authorization: Bearer <token_jwt>
 
 ---
 
-**DELETE**
+**`DELETE`**
 Elimina una categoria especifica de las categorias del usaurio, en `:categoria` : `nombre-categoria`
 
 ```bash
@@ -355,8 +343,7 @@ Elimina una categoria especifica de las categorias del usaurio, en `:categoria` 
 ```
 
 **REQUERIMIENTOS**
-
-✔ **pasar Bearer por body `key : Authorization`**
+Authorization: Bearer <token_jwt>
 
 ---
 
@@ -364,19 +351,19 @@ Elimina una categoria especifica de las categorias del usaurio, en `:categoria` 
 
 ### **Backend (Dependencias)**
 
-| Tecnología           | Versión       | Propósito                              |
-|----------------------|---------------|----------------------------------------|
-| [Node.js](#)         | `18.x+`       | Entorno de ejecución JavaScript        |
-| [Express](#)         | `^5.1.0`      | Framework para el servidor web         |
-| [Mongoose](#)        | `^8.13.2`     | ODM para MongoDB                       |
-| [JSON Web Token](#)  | `^9.0.2`      | Autenticación vía JWT                  |
-| [Bcrypt](#)          | `^5.1.1`      | Encriptación de contraseñas            |
-| [CORS](#)            | `^2.8.5`      | Manejo de políticas CORS               |
-| [Dotenv](#)          | `^16.4.7`     | Gestión de variables de entorno        |
-| [Express Validator](#)| `^7.2.1`      | Validación de datos en endpoints       |
-| [Multer](#)          | `^1.4.5-lts.2`| Manejo de uploads de archivos          |
-| [Nodemailer](#)      | `^6.10.1`     | Envío de emails                        |
-| [fs-extra](#)        | `^11.3.0`     | Mejoras al módulo `fs` de Node         |
+| Tecnología       | Versión       | Propósito                              |
+|------------------|---------------|----------------------------------------|
+| Node.js          | `18.x+`       | Entorno de ejecución JavaScript        |
+| Express         | `^5.1.0`      | Framework para el servidor web          |
+| Mongoose        | `^8.13.2`     | ODM para MongoDB                        |
+| JSON Web Token  | `^9.0.2`      | Autenticación vía JWT                   |
+| Bcrypt          | `^5.1.1`      | Encriptación de contraseñas             |
+| CORS            | `^2.8.5`      | Manejo de políticas CORS                |
+| Dotenv          | `^16.4.7`     | Gestión de variables de entorno         |
+| Express Validator| `^7.2.1`      | Validación de datos en endpoints       |
+| Multer          | `^1.4.5-lts.2`| Manejo de uploads de archivos           |
+| Nodemailer      | `^6.10.1`     | Envío de emails                         |
+| fs-extra        | `^11.3.0`     | Mejoras al módulo `fs` de Node          |
 
 ---
 
@@ -403,8 +390,8 @@ PASSWORDCORREO=
 SERVICE_MAIL=
 ```
 
-
 ## ESTRUCTURA DEL PROYECTO
+
 ```bash
 src/
 ├── controllers/
@@ -459,4 +446,3 @@ src/
 │
 └── .env → Archivo de variables de entorno
 ```
-
