@@ -2,12 +2,11 @@ import { User } from "../../models/fotografoModel.js"
 import { coleccionErrores } from "../../middleware/manejoDeErrores/coleccion-errores.js";
 
 export async function crearUserServices(datos) {
-    const {email, numeroCelular} = datos;
+    const {email} = datos;
     try { 
         const existentes = await User.findOne({
             $or:[
-            {email: email},
-           { numeroCelular: numeroCelular}
+            {email: email}
         ]
         });
         if(existentes) return false;
