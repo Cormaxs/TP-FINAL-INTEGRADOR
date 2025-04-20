@@ -1,28 +1,30 @@
 # TP FINAL - Plataforma Web para Fotógrafos 📸  
+
 **Nodo Tecnológico - Proyecto Integrador - FOTOGRAFOS**
 
 Este proyecto es una plataforma web donde los fotógrafos pueden subir su trabajo y los usuarios pueden contactarlos. Se desarrolló aplicando todo lo aprendido durante la cursada, utilizando la arquitectura **MVC**.
 
 ---
 
-## INSTALACION 
+## INSTALACION
 
 1. **`Clonar el repositorio:`**
+
 ```bash
 git clone [https://github.com/Cormaxs/TP-FINAL-INTEGRADOR.git]
 ```
 
 2. **`Instala las dependencias:`**
+
 ```bash
 npm install
 ```
 
 3. **`Inicia el servidor:`**
+
 ```bash
 npm run dev
 ```
-
-
 
 ## 🧠 Arquitectura General - Patrón MVC
 
@@ -52,15 +54,16 @@ npm run dev
 
 ---
 
-## 🌐 Recorrido de una solicitud típica 
-**Cliente → app.js → routes → middlewares → controllers → services → models/db**
+## 🌐 Recorrido de una solicitud típica
 
+**Cliente → app.js → routes → middlewares → controllers → services → models/db**
 
 ---
 
 ## 📁 Estructura de Rutas
 
 ### 1. `routes/autenticacion/crudUser.js`  
+
 Ruta base: `/user`  
 Maneja operaciones CRUD para usuarios.
 
@@ -74,6 +77,7 @@ Maneja operaciones CRUD para usuarios.
 ---
 
 ### 2. `routes/publicas/datosPublicos.js`  
+
 Ruta base: `/publico`  
 Contiene datos accesibles sin autenticación.
 
@@ -84,6 +88,7 @@ Contiene datos accesibles sin autenticación.
 ---
 
 ### 3. `routes/autenticacion/auth.js`  
+
 Ruta base: `/auth`  
 Maneja autenticación y control de sesiones.
 
@@ -93,14 +98,13 @@ Maneja autenticación y control de sesiones.
 | POST   | `/lagout/:id`  | Cerrar sesión                |
 | POST   | `/sesion/:id`  | Verificar o renovar sesión   |
 | GET    | `/correo/:id`  | Verificar cuenta desde el correo |
-| POST   | `/recuperarPassword` | Envia link de recuperacion al correo | 
+| POST   | `/recuperarPassword` | Envia link de recuperacion al correo |
 | POST   | `/actualizarPassword` | Cambia la contraseña |
 
 ---
 
-
-
 ### 4. `routes/manejoImagenes/subirFotos.js`  
+
 Ruta base: `/archivos`  
 Maneja la subida de fotos y mas adelante archivos de otro tipo.
 
@@ -126,7 +130,9 @@ Maneja la subida de fotos y mas adelante archivos de otro tipo.
 ---
 
 # formato de errores
+
 ## los mensajes de error deben tener minimo el codigo de error y el mensaje
+
 ```bash
 {
   "ok": false,
@@ -145,16 +151,18 @@ Maneja la subida de fotos y mas adelante archivos de otro tipo.
 
 ---
 
-# EJEMPLOS DE USOS - ENDPOINTS 
-
+# EJEMPLOS DE USOS - ENDPOINTS
 
 ### 1. `routes/autenticacion/crudUser.js`  
 
 **POST**
+
 ```bash
    /user/register
 ```
+
 Lo minimo necesario para crear un usuario es:
+
  ```bash
    {
       "email": "ejemplo@ejemplo.com",
@@ -167,6 +175,7 @@ Lo minimo necesario para crear un usuario es:
 
 **GET**
 para obtener el usuario por su id, cualquiera puede obtenerlo
+
 ```bash
    /user/:id
 ```
@@ -175,10 +184,13 @@ para obtener el usuario por su id, cualquiera puede obtenerlo
 
 **PUT**
 Modifica los datos por id, si mandamos datos vacios el middleware los filtra y solo actualiza los que no estan vacios
+
 ```bash
    /user/modificar/:id
 ```
+
 **REQUERIMIENTOS**
+
 ✔ **pasar Bearer por body `key : Authorization`**
 
 ---
@@ -186,17 +198,22 @@ Modifica los datos por id, si mandamos datos vacios el middleware los filtra y s
 **DELETE**
 Elimina usuario, solo el mismo usuario o el admin puede eliminarlo.
 Al borrar el usuario, todas las fotos y datos del mismo desaparecen
+
 ```bash
    /user/eliminar/:id
 ```
+
 **REQUERIMIENTOS**
+
 ✔ **pasar Bearer por body `key : Authorization`**
 
 ---
 
 ### 2. `routes/publicas/datosPublicos.js`  
+
 **GET**
 Busca usuarios por filtros, si no se ponen filtros trae todos, usando paginacion para traer solo 10 de la pagina 1, si no paso algun parametro, simplemente lo ignora y busca coincidencias de los demas, ademas ignora datos como el correo y contraseña
+
 ```bash
    /publico/buscador?nombre=ejemplo&ubicacion=ninguna&rol=client&page=2&limit=10
 ```
@@ -207,9 +224,11 @@ Busca usuarios por filtros, si no se ponen filtros trae todos, usando paginacion
 
 **POST**
    Inicia sesion
+
 ```bash
    /auth/login
 ```
+
 solo requiere email y contraseña desde el body
 
  ```bash
@@ -223,26 +242,33 @@ solo requiere email y contraseña desde el body
 
 **POST**
   Cierra sesion de la cuenta especifica
+
 ```bash
    /auth/lagout/:id
 ```
+
 **REQUERIMIENTOS**
+
 ✔ **pasar Bearer por body `key : Authorization`**
 
 ---
 
 **POST**
   Verifica si la sesion esta iniciada, se pone true o false en db
+
 ```bash
    /auth/sesion/:id
 ```
+
 **REQUERIMIENTOS**
+
 ✔ **pasar Bearer por body `key : Authorization`**
 
 ---
 
 **GET**
   Verificacion desde el gmail, cambia el estado de cuentaverificada a true y devuelve cuenta verificada
+
 ```bash
    /auth/correo/:id
 ```
@@ -251,6 +277,7 @@ solo requiere email y contraseña desde el body
 
 **POST**
   Pasando el correo del usuario en el body, envia un correo que lo lleva a un formulario para cambiar la contraseña
+
 ```bash
    /auth/recuperarPassword
 ```
@@ -259,64 +286,79 @@ solo requiere email y contraseña desde el body
 
 **POST**
   Recibe los datos del formulario de recuperar contraseña, requiere el email del usuario y la nueva contraseña
+
 ```bash
    /auth/actualizarPassword
 ```
 
 ---
 
-### 4. `routes/manejoImagenes/subirFotos.js` 
+### 4. `routes/manejoImagenes/subirFotos.js`
 
 **POST**
  Sube la foto de perfil o portada (de a 1), en `tipo` : `perfil o portada`, en el body debemos pasarla como form-data y en `key` : `imagen`
+
 ```bash
    /archivos/:tipo/:id
 ```
+
 **REQUERIMIENTOS**
+
 ✔ **pasar Bearer por body `key : Authorization`**
 
 ---
 
 **POST**
  Sube las imagenes a la categoria determinada, debo pasar `:categoria` : `bodas o la que gustes`, se pueden subir 5 maximas por categorias y no permite categorias repetidas, solo pueden usarlas los fotografos y admin
+
 ```bash
    /archivos/categorias/:categoria/:id
 ```
+
 **REQUERIMIENTOS**
+
 ✔ **pasar Bearer por body `key : Authorization`**
 
 ---
 
 **POST**
  Sube las imagenes a la categoria determinada, debo pasar `:categoria` : `bodas o la que gustes`, se pueden subir 5 maximas por categorias y no permite categorias repetidas
+
 ```bash
    /archivos/categorias/:categoria/:id
 ```
+
 **REQUERIMIENTOS**
+
 ✔ **pasar Bearer por body `key : Authorization`**
 
 ---
 
 **DELETE**
 Elimina una imagen especifica de la categoria, en `:imagen` : `nombre-imagen.webp`
+
 ```bash
    /archivos/categorias/:categoria/:id/:imagen
 ```
+
 **REQUERIMIENTOS**
+
 ✔ **pasar Bearer por body `key : Authorization`**
 
 ---
 
 **DELETE**
 Elimina una categoria especifica de las categorias del usaurio, en `:categoria` : `nombre-categoria`
+
 ```bash
    /archivos/categorias/categorias/:categoria/:id
 ```
+
 **REQUERIMIENTOS**
+
 ✔ **pasar Bearer por body `key : Authorization`**
 
 ---
-
 
 ## 🛠 Tecnologías Utilizadas
 
@@ -335,7 +377,6 @@ Elimina una categoria especifica de las categorias del usaurio, en `:categoria` 
 | [Multer](#)          | `^1.4.5-lts.2`| Manejo de uploads de archivos          |
 | [Nodemailer](#)      | `^6.10.1`     | Envío de emails                        |
 | [fs-extra](#)        | `^11.3.0`     | Mejoras al módulo `fs` de Node         |
-
 
 ---
 
@@ -361,3 +402,61 @@ PASSWORDCORREO=
 #servicio smtps recomendado para correos seguros 465
 SERVICE_MAIL=
 ```
+
+
+## ESTRUCTURA DEL PROYECTO
+```bash
+src/
+├── controllers/
+│   ├── autenticacion/
+│   │   ├── correo/ → (archivos relacionados con correo)
+│   │   ├── config-email.js → Configuración de email
+│   │   ├── recuperarContraseña.js → Lógica para recuperación de contraseña
+│   │   ├── verificarCorreo.js → Verificación de correo electrónico
+│   │   ├── authControllers.js → Controladores de autenticación
+│   │   └── crudController.js → Controladores CRUD de usuarios
+│   ├── crearCarpetas/ → (crea las carpetas dentro de imagenes en la raiz)
+│   │   └── crearCarpetas.js → Lógica para creación de carpetas, crea carpetas con nombre ID y categorias
+│   ├── datos-publicos/ → (Genera filtros)
+│   │   └── datosPublicosController.js → agrupa los filtros query
+│   ├── manejo-imagenes/ → (Todo relacionado al manejo de img)
+│   │   └── crud-imagenes.js → Operaciones CRUD para imágenes
+│   ├── db/ →  (Coneccion a db)
+│   │   └── db.js → Unica coneccion
+│   ├── middleware/ → (Todos los filtros, sanitizacion de datos y restricciones)
+│   │   ├── manejoDeErrores/
+│   │   │   ├── coleccion-errores.js → Colección de errores personalizados
+│   │   │   └── global-errores.js → Manejador global de errores
+│   │   ├── subidalmagenes/
+│   │   │   └── validacionesImg.js → Validaciones para subida de imágenes
+│   │   ├── token/
+│   │   │   └── verificarToken.js → verifica el token Bearer y  si es admin o usuario comun
+│   │   └── validar-campos/
+│   │       └── userMiddleware.js → Validaciones de campos de usuario basicos
+│   └── models/
+│       └── fotografoModel.js → Modelo de datos para todos
+│
+├── routes/
+│   ├── autenticacion/
+│   │   ├── auth.js → Rutas de autenticación y verificacion
+│   │   └── crudUser.js → Rutas CRUD de usuarios
+│   ├── manejolmagenes/
+│   │   └── subirFotos.js → Rutas para manejo de imágenes
+│   ├── publicas/
+│   │   └── datosPublicos.js → Rutas de datos públicos
+│   ├── services/
+│   │   ├── crud-user/
+│   │   │   ├── crudServices.js → Servicios CRUD de usuarios
+│   │   │   └── verificarCuenta.js → Servicios de verificación de cuenta
+│   │   ├── datos-publicos/
+│   │   │   └── datosPublicosServides.js → Servicios de datos públicos
+│   │   └── imagenPortadaPerfil/
+│   │       └── guardarEnDB.js → Servicios para imágenes de perfil
+│   └── utils/
+│       ├── bcrypt.js → Utilidades de encriptación
+│       ├── crearError.js → Generador de errores personalizados
+│       └── jwt.js → Utilidades para JWT
+│
+└── .env → Archivo de variables de entorno
+```
+

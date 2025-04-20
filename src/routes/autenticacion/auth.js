@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {verificarToken} from "../../middleware/token/verificarToken.js"
-import {iniciarSesion } from "../../controllers/autenticacion/authControllers.js"
+import {iniciarSesion, lagout, sesionActiva} from "../../controllers/autenticacion/authControllers.js"
 import { verificarCuenta } from "../../controllers/autenticacion/correo/verificarCorreo.js";
 import { recuperarPassword, cambiarContraseña } from "../../controllers/autenticacion/correo/recuperarContraseña.js";
 
@@ -9,16 +9,11 @@ export const autenticaciones = Router();
 //inicio de seion
 autenticaciones.post("/login", iniciarSesion);
 
-
 //cierre de sesion, invalida el token y cambia de estado de sesion activa a false
-autenticaciones.post("/lagout/:id", verificarToken, (req, res)=>{
-    res.send("cerrado")
-})
+autenticaciones.post("/lagout/:id", verificarToken, lagout)
 
 //ruta protegida, mantiene sesion activa
-autenticaciones.post("/sesion/:id", verificarToken, (req, res)=>{
-    res.send("estas activo")
-})
+autenticaciones.post("/sesion/:id", verificarToken, sesionActiva)
 
 //verificar cuenta correo
 autenticaciones.get("/correo/:id", verificarCuenta)

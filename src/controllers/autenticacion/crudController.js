@@ -15,7 +15,7 @@ export async function crearUsuario(req, res) {
         verificarCorreo(datos, resultado.id)
         return res.status(201).json({ message: "usuario creado correctamente" });
     }
-    return res.status(300).json({ message: "El correo o numero de telefono ya estan en uso" })
+    return res.status(300).json({ message: `El correo ${datos.email} ya esta en uso` })
 }
 
 
