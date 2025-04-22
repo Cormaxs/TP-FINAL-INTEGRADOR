@@ -32,11 +32,11 @@ export async function buscarUserId(id) {
 export async function modificarUserId(data, id) {
     try {
         const userActualizado = await User.findByIdAndUpdate(
-            id,
+          {_id: id},
             { $set: data },
             { new: true } // <- devuelve el documento actualizado
           )
-          .select('-password -email __v');
+          
         if (userActualizado) return userActualizado;
         return false;
     } catch (err) {

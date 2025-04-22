@@ -28,7 +28,7 @@ app.use("/archivos", fotos);
 // Esto permite acceder a las imágenes desde el navegador
 app.use('/imagenes', express.static('imagenes'));
 
-app.use(errorHandler)
+app.use(errorHandler)//agarra errores del coleccion de errores
 connectDB();
 
 

@@ -20,10 +20,11 @@ export async function cambiarContraseñaServices(email, nuevaPassword) {
 }
 
 
-export async function estadoCuenta(id, nuevoEstado) {
+export async function estadoCuenta(email, nuevoEstado) {
+
     try {
         const existeEmail = await User.findOneAndUpdate(
-            { _id: id },
+            { email: email },
             { $set: { estado: nuevoEstado } },
             { new: true }
         )

@@ -7,7 +7,7 @@ export async function crearUsuario(req, res) {
 
     const datos = req.body;
     const { password } = datos;
-
+console.log("datos resividos", datos)
     datos.password = await encriptarPassword(password);
     const resultado = await crearUserServices(datos);
 
@@ -23,6 +23,7 @@ export async function crearUsuario(req, res) {
 export async function modificarUsuario(req, res) {
     const data = req.body;
     const { id } = req.params;
+    console.log(data, id)
     if (data.password) data.password = await encriptarPassword(data.password);
     const guardado = await modificarUserId(data, id)
     if (guardado) return res.status(201).send({ message: "Datos actualizados correctamente: ", guardado });
@@ -40,6 +41,8 @@ export async function traerUsuario(req, res) {
 
 export async function eliminarUsuario(req, res) {
     const { id } = req.params;
+    const datos = req.body;
+    console.log(datos)
         const eliminado = await eliminarUserId(id);
         if (eliminado) {
             //eliminar carpeta de usuario
