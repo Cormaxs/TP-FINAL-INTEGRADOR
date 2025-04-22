@@ -1,4 +1,4 @@
-import mongoose, {Schema} from "mongoose";
+import mongoose from "mongoose";
 
 const datoSchema = new mongoose.Schema({
   nombre: { type: String, require: true },

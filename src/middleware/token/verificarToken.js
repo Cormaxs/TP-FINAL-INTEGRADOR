@@ -7,7 +7,7 @@ export function verificarToken(req, res, next) {
   const SECRET_KEY = process.env.SECRET_KEY;
   const authHeader = req.headers.authorization;
   const idPasado = req.params.id;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!authHeader || !authHeader.startsWith("Bearer")) {
     return res.status(401).json({ mensaje: "Token no proporcionado o mal formado" });
   }
 
