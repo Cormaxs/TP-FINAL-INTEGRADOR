@@ -11,3 +11,16 @@ export function sanitizarDatos(req, res, next) {
     }
   }
   
+
+
+ export  const noUser = (req, res, next) => {
+    const { rol } = req.usuario;
+    if (rol === "photographer" || rol === "admin") {
+        next(); // Permite continuar al siguiente middleware (subirImagenCategoria)
+    } else {
+        return res.status(403).json({ 
+            success: false, 
+            error: "Acceso denegado. Solo fotógrafos o administradores pueden subir imágenes." 
+        });
+    }
+};
