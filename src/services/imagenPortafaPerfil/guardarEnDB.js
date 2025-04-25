@@ -18,46 +18,55 @@ import { coleccionErrores } from "../../middleware/manejoDeErrores/coleccion-err
 
 
 // Agrega imágenes a una categoría del usuario (crea la categoría si no existe)
-export async function agregarImgCategoria(idUser, nombreCategoria, imagenes) {
+export async function agregarImgCategoria(idUser, nombreCategoria, precio, imagenes) {
     try {
-      //Validar usuario
+      // Validar usuario
       const usuario = await User.findById(idUser);
       if (!usuario) throw coleccionErrores.idNoEncontrado(idUser);
   
-      //Procesar imágenes (eliminar duplicados)
-      const imagenesUnicas = [...new Set(imagenes)];
+      // Procesar imágenes (eliminar duplicados)
+      const nuevasImagenesUnicas = [...new Set(imagenes)];
   
-      //Buscar si ya tiene la categoría
+      // Buscar si ya tiene la categoría
       const categoriaIndex = usuario.categorias.findIndex(
         c => c.categoria.toLowerCase() === nombreCategoria.toLowerCase()
       );
   
       if (categoriaIndex >= 0) {
-        // Actualizar existente
-        usuario.categorias[categoriaIndex].imagenes = imagenesUnicas;
-        usuario.categorias[categoriaIndex].ultimaActualizacion = Date.now();
+        // Si la categoría existe, combinar imágenes y actualizar precio
+        const categoria = usuario.categorias[categoriaIndex];
+        const imagenesActuales = categoria.imagenes;
+        const imagenesCombinadas = [...new Set([...imagenesActuales, ...nuevasImagenesUnicas])];
+  
+        categoria.imagenes = imagenesCombinadas;
+        categoria.precio = precio; // <- Ahora sí se actualiza el precio correctamente
+        categoria.ultimaActualizacion = Date.now();
       } else {
-        // Agregar nueva
+        // Si no existe, crear nueva categoría
         usuario.categorias.push({
           categoria: nombreCategoria,
-          imagenes: imagenesUnicas
+          precio: precio,
+          imagenes: nuevasImagenesUnicas,
+          ultimaActualizacion: Date.now()
         });
       }
+  
       await usuario.save();
   
       return {
         success: true,
         categoria: {
           nombre: nombreCategoria,
-          imagenes: imagenesUnicas
+          imagenes: categoriaIndex >= 0
+            ? usuario.categorias[categoriaIndex].imagenes
+            : nuevasImagenesUnicas
         }
       };
-  
     } catch (error) {
-      throw coleccionErrores.errAlGuardarImagen(error)
+      throw coleccionErrores.errAlGuardarImagen(error);
     }
   }
-
+  
 
 
   export async function eliminarFotosCategoria(idUser, nombreCategoria, imagenesAEliminar) {
@@ -130,3 +139,4 @@ export async function eliminarCategoriaDB(userId, categoryName) {
       categoriaEliminada: categoryName
   };
 }
+

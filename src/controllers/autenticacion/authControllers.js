@@ -1,6 +1,6 @@
 import { compararPassword } from "../../utils/bcrypt.js"
 import { crearToken } from "../../utils/jwt.js"
-import { existeCorreo, estadoCuenta} from "../../services/crud-user/verificarCuenta.js";
+import { existeCorreo, estadoCuentaEmail, estadoCuentaId} from "../../services/crud-user/verificarCuenta.js";
 import { coleccionErrores } from "../../middleware/manejoDeErrores/coleccion-errores.js";
 
 //inicia sesion 
@@ -11,7 +11,7 @@ export async function iniciarSesion(req, res) {
   const esValida = await compararPassword(password, usuario.password);
   console.log(esValida)
   if (esValida) {
-    await estadoCuenta(email, "true");
+    await estadoCuentaEmail(email, "true");
     const token = await crearToken(usuario);
     return res.status(200).json({
       valido: true, 
@@ -28,14 +28,14 @@ export async function iniciarSesion(req, res) {
 
 export async function lagout(req, res) {
   const {id} = req.usuario;
- const retorno =   await estadoCuenta(id, "false");
-  console.log(retorno, req.usuario)
+ const retorno =   await estadoCuentaId(id, "false");
+  console.log("estado: ", retorno, req.usuario)
   res.status(200).json({message: "Sesion cerrada correctamente"})
 }
 
 export async function sesionActiva(req, res){
-  const {id} = req.usuario;
-  const retorno = await estadoCuenta(id, "true");
+  const {email} = req.usuario;
+  const retorno = await estadoCuentaEmail(email, "true");
   console.log(retorno, req.usuario)
   res.status(200).json({message: "Sesion activa"})
 }

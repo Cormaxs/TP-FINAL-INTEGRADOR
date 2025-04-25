@@ -19,12 +19,29 @@ export async function cambiarContraseñaServices(email, nuevaPassword) {
     if (!cambio) throw coleccionErrores.errUpdatePassword()
 }
 
-
-export async function estadoCuenta(email, nuevoEstado) {
-
+//activar mediante email
+export async function estadoCuentaEmail(email, nuevoEstado) {
+   
     try {
         const existeEmail = await User.findOneAndUpdate(
             { email: email },
+            { $set: { estado: nuevoEstado } },
+            { new: true }
+        )
+        console.log("email existe",existeEmail)
+       return existeEmail
+    } catch (err) {
+        throw coleccionErrores.correoNoExiste(err)
+    }
+
+}
+
+
+//activar mediante id
+export async function estadoCuentaId(id, nuevoEstado) {
+    try {
+        const existeEmail = await User.findOneAndUpdate(
+            { _id: id },
             { $set: { estado: nuevoEstado } },
             { new: true }
         )

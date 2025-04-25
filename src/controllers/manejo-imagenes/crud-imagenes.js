@@ -8,30 +8,49 @@ import { coleccionErrores } from '../../middleware/manejoDeErrores/coleccion-err
 const rootDir = process.cwd();
 const imagesDir = join(rootDir, 'imagenes');
 
-//sube img perfil-portada
 export const subirImagen = async (req, res) => {
     const { id, tipo } = req.params;
     try {
-        // Crea estructura de carpetas
+        // Validar que el tipo sea 'perfil' o 'portada'
+        if (tipo !== 'perfil' && tipo !== 'portada') {
+            return res.status(400).json({ success: false, error: "Tipo de imagen no válido. Debe ser 'perfil' o 'portada'." });
+        }
+
+        // Crear estructura de carpetas
         await crearUserID(id);
-        // Define rutas
+        
+        // Definir ruta de destino
         const destinoDir = join(imagesDir, id, 'perfil-portada');
+        
+        // Eliminar archivos anteriores del mismo tipo (perfil o portada)
+        const archivos = await fs.readdir(destinoDir);
+        for (const archivo of archivos) {
+            if (archivo.startsWith(tipo)) { // Si el archivo comienza con 'perfil' o 'portada'
+                await fs.unlink(join(destinoDir, archivo)); // Elimina el archivo anterior
+            }
+        }
+
+        // Generar nuevo nombre de archivo
         const nombreArchivo = `${tipo}-${id}${path.extname(req.file.originalname) || '.webp'}`;
         const rutaFinal = join(destinoDir, nombreArchivo);
-        //Mueve el archivo
+        
+        // Mover el archivo subido a la ruta final
         await fs.rename(req.file.path, rutaFinal);
-        //Genera el URL
+        
+        // Generar URL pública
         const rutaRelativa = join('imagenes', id, 'perfil-portada', nombreArchivo);
         const url = `${req.protocol}://${req.get('host')}/${rutaRelativa.replace(/\\/g, '/')}`;
-        //Guarda en DB
+        
+        // Guardar en la base de datos
         await guardarEnDB(url, id, tipo);
+        
         res.status(200).json({ 
             success: true,
             url,
             rutaLocal: rutaRelativa
         });
     } catch (error) {
-        throw coleccionErrores.errAlGuardarImagen(error)
+        throw coleccionErrores.errAlGuardarImagen(error);
     }
 };
 
@@ -39,6 +58,7 @@ export const subirImagen = async (req, res) => {
 //sube img categorias en carpeta local
 export const subirImagenCategoria = async (req, res) => {
     const { id, categoria } = req.params;
+    const {precio} = req.body;
     try {
         // Verificar/crear estructura de carpetas
         const { categorias: rutaCategorias } = await crearUserID(id);
@@ -79,7 +99,7 @@ export const subirImagenCategoria = async (req, res) => {
 
         // Actualizar MongoDB con las URLs de las imágenes
         const urlsImagenes = resultados.map(r => r.url);
-        const resultadoMongo = await agregarImgCategoria(id, categoria, urlsImagenes);
+        const resultadoMongo = await agregarImgCategoria(id, categoria,precio, urlsImagenes);
         
         if (!resultadoMongo.success) {
             throw new Error(resultadoMongo.error);
