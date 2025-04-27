@@ -10,7 +10,7 @@ export const fotos = express.Router();
 const upload = multer({
     dest: 'imagenes/',
     limits: {
-      fileSize: 50 * 1024 * 1024 // 50 MB en bytes
+      fileSize: 100 * 1024 * 1024 // 100 MB en bytes
     }
   });
 

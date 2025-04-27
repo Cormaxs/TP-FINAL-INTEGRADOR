@@ -12,7 +12,7 @@ import cors from "cors";
 dotenv.config();
 const app = express(); 
 const PORT = process.env.PORT || 3000; 
-app.use(express.json()); // Esto permite leer JSON en las rutas POST
+app.use(express.json({limit: '100mb'})); // Esto permite leer JSON en las rutas POST
 
 
 
