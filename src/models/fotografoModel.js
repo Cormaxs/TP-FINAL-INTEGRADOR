@@ -16,6 +16,7 @@ const datoSchema = new mongoose.Schema({
   plan: { type: String, default: "gratuito" },      // Ej: "gratuito", "premium"
   estado: {type: Boolean, default: false},          //sesion activa o cerrada
   termininos: {type:Boolean, require: true},
+  descripcion: {type: String }, 
 
   //array de categorias que tiene el usuario
   categorias: [{
