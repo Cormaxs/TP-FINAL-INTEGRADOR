@@ -6,6 +6,7 @@ export async function buscadorSitio(req, res) {
     nombre: req.query.nombre,
     ubicacion: req.query.ubicacion,
     rol: req.query.rol,
+    categoria: req.query.categoria,
     page: parseInt(req.query.page) || 1,
     limit: parseInt(req.query.limit) || 10,
   };
