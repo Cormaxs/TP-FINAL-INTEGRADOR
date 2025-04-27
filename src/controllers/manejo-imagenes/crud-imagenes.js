@@ -86,7 +86,7 @@ export const subirImagenCategoria = async (req, res) => {
                 
                 // Generar URL
                 const rutaRelativa = join('imagenes', id, 'categorias', categoria, nombreArchivo);
-                const url = `${req.protocol}://${req.get('host')}/${rutaRelativa.replace(/\\/g, '/')}`;
+                const url = `https://${req.get('host')}/${rutaRelativa.replace(/\\/g, '/')}`;//cambio a https antes ${req.protocol}
                 
                 return {
                     url,
