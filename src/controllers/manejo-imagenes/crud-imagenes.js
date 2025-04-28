@@ -39,7 +39,7 @@ export const subirImagen = async (req, res) => {
         
         // Generar URL pública
         const rutaRelativa = join('imagenes', id, 'perfil-portada', nombreArchivo);
-        const url = `${req.protocol}://${req.get('host')}/${rutaRelativa.replace(/\\/g, '/')}`;
+        const url = `https://${req.get('host')}/${rutaRelativa.replace(/\\/g, '/')}`;
         
         // Guardar en la base de datos
         await guardarEnDB(url, id, tipo);
