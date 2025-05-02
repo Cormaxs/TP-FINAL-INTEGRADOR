@@ -11,7 +11,7 @@ userRoutes.post("/register",validarUsuario, crearUsuario)
 //modificar usuario 
 userRoutes.put("/modificar/:id",verificarToken, datosActualizar, modificarUsuario )
 
-//traer usuario -> pasar a publico
+//traer usuario -> pasar a publico 
 userRoutes.get("/:id", traerUsuario);
 
 //eliminar usuario

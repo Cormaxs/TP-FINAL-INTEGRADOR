@@ -6,6 +6,7 @@ import { cambiarContraseñaServices } from "../../../services/crud-user/verifica
 
 //manda mensaje al correo pasado con el link para recuperar contraseña
 export async function recuperarPassword(req, res) {
+    console.log(req.body)
     const { email } = req.body;
     await existeCorreo(email);
     const info = await transporter.sendMail(mailOptions(
@@ -14,20 +15,22 @@ export async function recuperarPassword(req, res) {
         html(" ", " ", "recuperar contraseña"),
         "gracias por elegirnos"
     ));
-    if (info) res.status(200).json({ mensaje: "Correo enviado correctamente" });
+    console.log(info)
+    if (info) return res.status(200).json({ mensaje: "Correo enviado correctamente" });
     res.status(400).json({ message: "El correo no existe o no esta registrado" })
 }
 
 
 export async function cambiarContraseña(req, res) {
     const { email, password } = req.body;
+    console.log(email, password)
     const hashear = await encriptarPassword(password);
     await cambiarContraseñaServices(email, hashear);
     return res.status(200).json({ message: "contraseña cambiada con exito" })
 }
 
 
-
+ 
 
 
 
@@ -43,7 +46,7 @@ export async function cambiarContraseña(req, res) {
 export function html(nombre, id, tema) {
     const esRecuperar = tema === "recuperar contraseña";
     const link = esRecuperar
-        ? `${process.env.BASE_URL}/auth/recuperar/${id}`
+        ? `https://fotografoscatamarca.com/update-password`
         : `${process.env.BASE_URL}/auth/correo/${id}`;
 
     const botonTexto = esRecuperar ? "Restablecer contraseña" : "Verificar mi correo";
