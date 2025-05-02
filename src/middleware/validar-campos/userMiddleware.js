@@ -13,6 +13,9 @@ export const validarUsuario = [
   body("password")
     .isLength({ min: 6 }).withMessage("La contraseña debe tener al menos 6 caracteres"),
 
+    body("rol")
+  .isIn(["client", "photographer"])
+  .withMessage("El rol debe ser 'cliente' o 'fotografo'"),
   (req, res, next) => {
     const errores = validationResult(req);
     if (!errores.isEmpty()) {
@@ -26,6 +29,7 @@ export const validarUsuario = [
 export const datosActualizar = (req, res, next) => {
   const datos = req.body;
   const {rol} = req.usuario;
+  console.log(rol, req.body)
 
   const datosFiltrados = Object.fromEntries(
     Object.entries(datos).filter(

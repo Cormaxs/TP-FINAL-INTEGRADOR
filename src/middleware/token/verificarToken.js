@@ -29,4 +29,4 @@ export function verificarToken(req, res, next) {
       mensaje: "Token inválido o expirado"
     });
   }
-}
+} 
