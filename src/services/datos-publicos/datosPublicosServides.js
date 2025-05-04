@@ -10,12 +10,11 @@ export async function buscadorSitioTodo(filtrosBusqueda = {}) {
   // Si no se pasa un rol, buscar por fotógrafos y administradores
   if (!rol || rol.length === 0) {
     filtroDB['rol'] = { 
-      $in: ['photographer', 'admin'] // Buscar por ambos roles si no se pasa un rol específico
+      $in: ['photographer', 'admin'] 
     };
   } else {
-    // Si se pasa un rol, buscar solo por ese rol
     filtroDB['rol'] = { 
-      $in: rol // Filtrar por el rol o roles especificados
+      $in: rol 
     };
   }
 
@@ -28,7 +27,7 @@ export async function buscadorSitioTodo(filtrosBusqueda = {}) {
       };
     }
 
-    // Filtro por nombre: si hay más de un nombre, usar $in
+    // Filtro por nombre
     if (nombre && nombre.length > 0) {
       filtroDB['nombre'] = {
         $in: nombre.map((n) => new RegExp(n, 'i')), // Hacer una búsqueda case-insensitive por cada nombre

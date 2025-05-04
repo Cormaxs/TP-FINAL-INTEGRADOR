@@ -10,7 +10,7 @@ export async function verificarCuentaServices(id) {
 export async function existeCorreo(email) { 
     const existe = await User.findOne({ email });
     if (!existe) throw coleccionErrores.correoNoExiste();
-    return existe;//cambio de true
+    return existe;
 }
 
 
@@ -28,7 +28,6 @@ export async function estadoCuentaEmail(email, nuevoEstado) {
             { $set: { estado: nuevoEstado } },
             { new: true }
         )
-        console.log("email existe",existeEmail)
        return existeEmail
     } catch (err) {
         throw coleccionErrores.correoNoExiste(err)

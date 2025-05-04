@@ -11,7 +11,7 @@ const imagesDir = join(rootDir, 'imagenes');
 export const subirImagen = async (req, res) => {
     const { id, tipo } = req.params;
     try {
-        // Validar que el tipo sea 'perfil' o 'portada'
+        
         if (tipo !== 'perfil' && tipo !== 'portada') {
             return res.status(400).json({ success: false, error: "Tipo de imagen no válido. Debe ser 'perfil' o 'portada'." });
         }
@@ -30,7 +30,7 @@ export const subirImagen = async (req, res) => {
             }
         }
 
-        // Generar nuevo nombre de archivo
+        // Generar nuevo nombre de archivo y cambia extension a webp
         const nombreArchivo = `${tipo}-${id}${path.extname(req.file.originalname) || '.webp'}`;
         const rutaFinal = join(destinoDir, nombreArchivo);
         

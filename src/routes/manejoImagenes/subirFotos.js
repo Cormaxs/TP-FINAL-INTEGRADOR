@@ -16,7 +16,7 @@ const upload = multer({
 
 
 
-//ruta dinamica para subir img perfil y portada, agregar un middleware de verificacion de token he id y recien permitir edicion
+//subir img perfil y portada, agregar un middleware de verificacion de token he id y recien permitir edicion
 fotos.post('/:tipo/:id',verificarToken, upload.single('imagen'), subirImagen);
 
 //sube imagenes a la categoria
