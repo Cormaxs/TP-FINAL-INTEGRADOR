@@ -5,7 +5,7 @@ import { CustomError } from '../../utils/crearError.js';
 
 
 // Obtener la ruta ABSOLUTA del directorio raíz del proyecto
-const __dirname = dirname(fileURLToPath(import.meta.url));
+//const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = process.cwd(); // Esto siempre apunta a donde ejecutas node
 const imagesDir = join(rootDir, 'imagenes');
 

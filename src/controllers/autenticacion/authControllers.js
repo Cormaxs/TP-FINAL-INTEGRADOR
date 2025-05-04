@@ -9,7 +9,7 @@ export async function iniciarSesion(req, res) {
   const usuario = await existeCorreo(email);
   if (!usuario.email) return res.status(404).json({ message: "Los datos ingresados no coinciden" });
   const esValida = await compararPassword(password, usuario.password);
-  console.log(esValida)
+  
   if (esValida) {
     await estadoCuentaEmail(email, "true");
     const token = await crearToken(usuario);
@@ -29,13 +29,11 @@ export async function iniciarSesion(req, res) {
 export async function lagout(req, res) {
   const {id} = req.usuario;
  const retorno =   await estadoCuentaId(id, "false");
-  console.log("estado: ", retorno, req.usuario)
   res.status(200).json({message: "Sesion cerrada correctamente"})
 }
 
 export async function sesionActiva(req, res){
   const {email} = req.usuario;
   const retorno = await estadoCuentaEmail(email, "true");
-  console.log(retorno, req.usuario)
   res.status(200).json({message: "Sesion activa"})
 }

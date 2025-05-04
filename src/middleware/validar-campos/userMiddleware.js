@@ -6,7 +6,6 @@ export const validarUsuario = [
     .notEmpty().withMessage("El email es obligatorio")
     .isEmail().withMessage("El formato del email es inválido"),
 
-  // Podés agregar más validaciones:
   body("nombre")
     .notEmpty().withMessage("El nombre es obligatorio"),
 
@@ -43,6 +42,6 @@ export const datosActualizar = (req, res, next) => {
   //solo cuando ya sea admin dejo que cambie la casilla de admin
   if( datosFiltrados.rol === 'admin' && rol !== datosFiltrados.rol) return res.status(400).json({message: "No posee permisos de administrador"})
 
-  req.body = datosFiltrados; // Reemplazamos por los datos limpios
-  next(); // Pasamos al siguiente middleware o controlador
+  req.body = datosFiltrados; 
+  next();
 };

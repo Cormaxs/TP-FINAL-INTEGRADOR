@@ -6,7 +6,7 @@ import { recuperarPassword, cambiarContraseña } from "../../controllers/autenti
 
 export const autenticaciones = Router();
   
-//inicio de seion
+
 autenticaciones.post("/login", iniciarSesion);
 
 //cierre de sesion, invalida el token y cambia de estado de sesion activa a false
