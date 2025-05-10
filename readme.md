@@ -1,7 +1,16 @@
 # TP FINAL - Plataforma Web para Fotógrafos 📸  
 
 **Nodo Tecnológico - Proyecto Integrador - FOTOGRAFOS**
-Este proyecto es una plataforma web donde los fotógrafos pueden subir su trabajo y los usuarios pueden contactarlos. Se desarrolló aplicando todo lo aprendido durante la cursada, utilizando la arquitectura **MVC**.
+Este proyecto es una plataforma web donde los fotógrafos pueden subir su trabajo y los usuarios pueden contactarlos. Se desarrolló aplicando todo lo aprendido durante la cursada, utilizando la arquitectura **MVC**. 
+
+## 🌐 Despliegue del Proyecto
+
+El proyecto está desplegado en una **VPS (Servidor Privado Virtual)** y utiliza las siguientes herramientas para garantizar un funcionamiento óptimo:
+
+- **NGINX**: actúa como proxy inverso, gestionando las peticiones entrantes y redirigiéndolas al backend.
+- **Certbot**: se encarga de generar y renovar automáticamente los certificados SSL para habilitar HTTPS.
+- **MongoDB**: base de datos NoSQL instalada directamente en la VPS para el almacenamiento de información.
+- **PM2**: administrador de procesos para Node.js que permite mantener el servidor activo en segundo plano, reiniciarlo automáticamente ante errores y conservarlo activo tras reinicios del sistema.
 
 ---
 
