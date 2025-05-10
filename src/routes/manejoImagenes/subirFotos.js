@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import {verificarToken} from "../../middleware/token/verificarToken.js"
-import { subirImagen, subirImagenCategoria, eliminarImagenCategoria, eliminarCategoria } from '../../controllers/manejo-imagenes/crud-imagenes.js';
+import { subirImagen, subirImagenCategoria, eliminarImagenCategoria, eliminarCategoria,actualizarPrecioCategoria } from '../../controllers/manejo-imagenes/crud-imagenes.js';
 import { sanitizarDatos } from '../../middleware/subidaImagenes/validacionesImg.js';
 import { noUser } from '../../middleware/subidaImagenes/validacionesImg.js';
 
@@ -20,10 +20,12 @@ const upload = multer({
 fotos.post('/:tipo/:id',verificarToken, upload.single('imagen'), subirImagen);
 
 //sube imagenes a la categoria
-fotos.post("/categorias/:categoria/:id",verificarToken, noUser,sanitizarDatos,  upload.array('imagenes', 5), subirImagenCategoria)
+fotos.post("/categorias/:categoria/:id",verificarToken, noUser,sanitizarDatos,  upload.array('imagenes', 10), subirImagenCategoria)
 
 
 fotos.delete("/categorias/:categoria/:id/:imagen",verificarToken, sanitizarDatos, eliminarImagenCategoria)
 
 //agregar eliminar categoria
 fotos.delete("/categorias/:categoria/:id",verificarToken, sanitizarDatos, eliminarCategoria);
+
+fotos.put("/updatePrice/:categoria/:id",verificarToken, actualizarPrecioCategoria )

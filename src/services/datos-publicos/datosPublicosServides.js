@@ -34,7 +34,7 @@ export async function buscadorSitioTodo(filtrosBusqueda = {}) {
       };
     }
 
-    // Filtros para otros campos (ubicación, rol, etc.)
+    // Filtros para otros campos 
     Object.entries(otrosFiltros).forEach(([campo, valor]) => {
       if (typeof valor === 'string' && valor.trim() !== '') {
         filtroDB[campo] = {

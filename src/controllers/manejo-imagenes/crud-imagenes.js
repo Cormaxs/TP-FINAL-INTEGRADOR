@@ -1,132 +1,142 @@
 import { promises as fs } from 'fs';
 import path, { join }  from 'path';
-import { guardarEnDB, agregarImgCategoria, eliminarCategoriaDB, eliminarFotosCategoria } from '../../services/imagenPortafaPerfil/guardarEnDB.js';
+import { guardarEnDB, agregarImgCategoria, eliminarCategoriaDB, eliminarFotosCategoria, updatePriceCategoria } from '../../services/imagenPortafaPerfil/guardarEnDB.js';
 import { crearUserID } from '../crearCarpetas/crearCarpetas.js';
 import { coleccionErrores } from '../../middleware/manejoDeErrores/coleccion-errores.js';
-
+import { optimizarImagenes } from './optimizar-imagenes.js'; 
 
 const rootDir = process.cwd();
 const imagesDir = join(rootDir, 'imagenes');
 
 export const subirImagen = async (req, res) => {
-    const { id, tipo } = req.params;
-    try {
-        
-        if (tipo !== 'perfil' && tipo !== 'portada') {
-            return res.status(400).json({ success: false, error: "Tipo de imagen no válido. Debe ser 'perfil' o 'portada'." });
-        }
+  const { id, tipo } = req.params;
 
-        // Crear estructura de carpetas
-        await crearUserID(id);
-        
-        // Definir ruta de destino
-        const destinoDir = join(imagesDir, id, 'perfil-portada');
-        
-        // Eliminar archivos anteriores del mismo tipo (perfil o portada)
-        const archivos = await fs.readdir(destinoDir);
-        for (const archivo of archivos) {
-            if (archivo.startsWith(tipo)) { // Si el archivo comienza con 'perfil' o 'portada'
-                await fs.unlink(join(destinoDir, archivo)); // Elimina el archivo anterior
-            }
-        }
-
-        // Generar nuevo nombre de archivo y cambia extension a webp
-        const nombreArchivo = `${tipo}-${id}${path.extname(req.file.originalname) || '.webp'}`;
-        const rutaFinal = join(destinoDir, nombreArchivo);
-        
-        // Mover el archivo subido a la ruta final
-        await fs.rename(req.file.path, rutaFinal);
-        
-        // Generar URL pública
-        const rutaRelativa = join('imagenes', id, 'perfil-portada', nombreArchivo);
-        const url = `https://${req.get('host')}/${rutaRelativa.replace(/\\/g, '/')}`;
-        
-        // Guardar en la base de datos
-        await guardarEnDB(url, id, tipo);
-        
-        res.status(200).json({ 
-            success: true,
-            url,
-            rutaLocal: rutaRelativa
-        });
-    } catch (error) {
-        throw coleccionErrores.errAlGuardarImagen(error);
+  try {
+    if (tipo !== 'perfil' && tipo !== 'portada') {
+      return res.status(400).json({ success: false, error: "Tipo de imagen no válido. Debe ser 'perfil' o 'portada'." });
     }
+
+    // Crear carpetas necesarias
+    await crearUserID(id);
+    const destinoDir = join(imagesDir, id, 'perfil-portada');
+
+    // Eliminar archivos anteriores del mismo tipo
+    const archivos = await fs.readdir(destinoDir);
+    for (const archivo of archivos) {
+      if (archivo.startsWith(tipo)) {
+        await fs.unlink(join(destinoDir, archivo));
+        
+      }
+    }
+
+    // Optimizar imagen desde la ruta temporal
+    const rutaTemporal = req.file.path;
+    const rutaOptimizada = await optimizarImagenes(rutaTemporal);
+
+    // Renombrar archivo optimizado a nombre final en carpeta destino
+    const nombreArchivoFinal = `${tipo}-${id}.webp`;
+    const rutaFinal = join(destinoDir, nombreArchivoFinal);
+    await fs.rename(rutaOptimizada, rutaFinal);
+    await fs.unlink(req.file.path);
+
+
+    // URL pública
+    const rutaRelativa = join('imagenes', id, 'perfil-portada', nombreArchivoFinal);
+    const url = `https://${req.get('host')}/${rutaRelativa.replace(/\\/g, '/')}`;
+
+    // Guardar en la base de datos
+    await guardarEnDB(url, id, tipo);
+
+    res.status(200).json({
+      success: true,
+      url,
+      rutaLocal: rutaRelativa
+    });
+
+  } catch (error) {
+    throw coleccionErrores.errAlGuardarImagen(error);
+  }
 };
+
 
 
 //sube img categorias en carpeta local
 export const subirImagenCategoria = async (req, res) => {
     const { id, categoria } = req.params;
-    const {precio} = req.body;
+    const { precio } = req.body;
+  
     try {
-        // Verificar/crear estructura de carpetas
-        const { categorias: rutaCategorias } = await crearUserID(id);
-        const rutaCategoria = join(rutaCategorias, categoria);
-        
-        // Crear carpeta de categoría si no existe
-        await fs.mkdir(rutaCategoria, { recursive: true });
-        
-        //Procesar cada imagen
-        const resultados = await Promise.all(
-            req.files.map(async (file) => {
-                const nombreArchivo = file.originalname;
-                const rutaFinal = join(rutaCategoria, nombreArchivo);
-                
-                // Eliminar archivo existente si hay uno
-                try {
-                    await fs.access(rutaFinal);
-                    await fs.unlink(rutaFinal);
-                } catch (err) {
-                    if (err.code !== 'ENOENT') throw err;
-                }
-                
-                // Mover archivo a su ubicación final
-                await fs.rename(file.path, rutaFinal);
-                
-                // Generar URL
-                const rutaRelativa = join('imagenes', id, 'categorias', categoria, nombreArchivo);
-                const url = `https://${req.get('host')}/${rutaRelativa.replace(/\\/g, '/')}`;//cambio a https antes ${req.protocol}
-                
-                return {
-                    url,
-                    nombreArchivo,
-                    categoria,
-                    extension: path.extname(file.originalname),
-                };
-            })
-        );
-
-        // Actualizar MongoDB con las URLs de las imágenes
-        const urlsImagenes = resultados.map(r => r.url);
-        const resultadoMongo = await agregarImgCategoria(id, categoria,precio, urlsImagenes);
-        
-        if (!resultadoMongo.success) {
-            throw new Error(resultadoMongo.error);
-        }
-
-        res.json({
-            success: true,
-            mensaje: `${req.files.length} imágenes procesadas en categoría ${categoria}`,
-            archivosSobrescritos: resultados.filter(r => r.sobrescrito).length,
-            resultados,
-            mongoResult: resultadoMongo
-        });
+      // Verificar/crear estructura de carpetas
+      const { categorias: rutaCategorias } = await crearUserID(id);
+      const rutaCategoria = join(rutaCategorias, categoria);
+      await fs.mkdir(rutaCategoria, { recursive: true });
+  
+      const resultados = await Promise.all(
+        req.files.map(async (file) => {
+          // Optimizar imagen y obtener nueva ruta (con extensión .webp)
+          const rutaOptimizada = await optimizarImagenes(file.path);
+  
+          // Definir nombre final y ruta final
+          const nombreFinal = path.basename(rutaOptimizada);
+          const rutaFinal = join(rutaCategoria, nombreFinal);
+  
+          // Eliminar si ya existe
+          try {
+            await fs.access(rutaFinal);
+            await fs.unlink(rutaFinal);
+          } catch (err) {
+            if (err.code !== 'ENOENT') throw err;
+          }
+  
+          // Mover imagen optimizada a su ubicación final
+          await fs.rename(rutaOptimizada, rutaFinal);
+  
+          // Eliminar archivo temporal original
+          await fs.unlink(file.path);
+  
+          // Generar URL pública
+          const rutaRelativa = join('imagenes', id, 'categorias', categoria, nombreFinal);
+          const url = `https://${req.get('host')}/${rutaRelativa.replace(/\\/g, '/')}`;
+  
+          return {
+            url,
+            nombreArchivo: nombreFinal,
+            categoria,
+            extension: '.webp',
+          };
+        })
+      );
+  
+      // Guardar en MongoDB
+      const urlsImagenes = resultados.map(r => r.url);
+      const resultadoMongo = await agregarImgCategoria(id, categoria, precio, urlsImagenes);
+  
+      if (!resultadoMongo.success) {
+        throw new Error(resultadoMongo.error);
+      }
+  
+      res.json({
+        success: true,
+        mensaje: `${req.files.length} imágenes procesadas en categoría ${categoria}`,
+        resultados,
+        mongoResult: resultadoMongo,
+      });
+  
     } catch (error) {
-        // Limpiar archivos temporales en caso de error
-        if (req.files) {
-            await Promise.all(
-                req.files.map(file => fs.unlink(file.path).catch(console.error))
-            );
-        }
-        
-        console.error('Error al subir imágenes por categoría:', error);
-        res.status(500).json({ 
-            error: "Error al procesar imágenes",
-            detalle: error.message 
-        });
+      // Eliminar archivos temporales si ocurre un error
+      if (req.files) {
+        await Promise.all(
+          req.files.map(file => fs.unlink(file.path).catch(() => {}))
+        );
+      }
+  
+      console.error('Error al subir imágenes por categoría:', error);
+      res.status(500).json({
+        error: "Error al procesar imágenes",
+        detalle: error.message
+      });
     }
-};
+  };
 
 //elimina archivos
 export const eliminarImagenCategoria = async (req, res) => {
@@ -262,3 +272,8 @@ export const eliminarUsuarioCarpeta = async (id) => {
         
     }
 };
+
+export const actualizarPrecioCategoria= async (req,res) => {
+    const respuesta = await updatePriceCategoria(req.params.id, req.body);
+    res.send(respuesta)
+}

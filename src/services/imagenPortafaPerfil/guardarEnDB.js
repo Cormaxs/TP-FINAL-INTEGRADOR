@@ -140,3 +140,31 @@ export async function eliminarCategoriaDB(userId, categoryName) {
   };
 }
 
+export async function updatePriceCategoria(id, datos) {
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      throw new Error("Usuario no encontrado");
+    }
+
+    // Buscar la categoría dentro del array `categorias`
+    const categoriaEncontrada = user.categorias.find(cat => cat.categoria === datos.categoria);
+
+    if (!categoriaEncontrada) {
+      throw new Error("Categoría no encontrada en el usuario");
+    }
+
+    // Actualizar el precio de la categoría encontrada
+    categoriaEncontrada.precio = datos.precio;
+
+    // Guardar los cambios en la base de datos
+    await user.save();
+
+    return { mensaje: "Precio actualizado correctamente" };
+  } catch (error) {
+    console.error("Error al actualizar el precio:", error);
+    throw error;
+  }
+}
+
+
