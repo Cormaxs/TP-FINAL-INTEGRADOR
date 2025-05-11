@@ -3,9 +3,20 @@ import fs from 'fs-extra';
 import path from 'path';
 
 export async function optimizarImagenes(inputPath) {
+  let outputPath = '';
+  let tempFilePath = ''; // Para manejar archivos temporales
+
   try {
-    console.log(inputPath)
-    const image = sharp(inputPath);
+    // Crear ruta de salida con extensión .webp
+    const { dir, name } = path.parse(inputPath);
+    outputPath = path.join(dir, `${name}.webp`);
+    tempFilePath = path.join(dir, `${name}_temp.webp`);
+
+    // Leer el archivo en buffer primero para cerrar el stream inmediatamente
+    const inputBuffer = await fs.readFile(inputPath);
+    
+    // Procesar la imagen
+    const image = sharp(inputBuffer);
     const metadata = await image.metadata();
     const width = metadata.width;
     const height = metadata.height;
@@ -20,32 +31,42 @@ export async function optimizarImagenes(inputPath) {
       targetWidth = 720;
     }
 
-    // Generar ruta de salida cambiando extensión a .webp
-    const { dir, name } = path.parse(inputPath);
-    const outputPath = path.join(dir, `${name}.webp`);
-
     // Redimensionar y convertir
     let quality = 80;
-    let resizedImage = image.resize({ width: targetWidth, withoutEnlargement: true });
-    let webpBuffer = await resizedImage.webp({ quality }).toBuffer();
-    let optimizedSizeKB = webpBuffer.length / 1024;
+    let resizedImage = image.resize({ 
+      width: targetWidth, 
+      withoutEnlargement: true 
+    });
 
-    // Reducir calidad si supera los 500KB
-    while (optimizedSizeKB > 250 && quality > 10) {
-      quality -= 5;
+    // Optimización en pasos
+    let webpBuffer;
+    let optimizedSizeKB;
+    
+    do {
       webpBuffer = await resizedImage.webp({ quality }).toBuffer();
       optimizedSizeKB = webpBuffer.length / 1024;
-     // console.log(`Reoptimizando con calidad ${quality}, tamaño: ${optimizedSizeKB.toFixed(2)} KB`);
-    }
+      
+      if (optimizedSizeKB > 250) {
+        quality = Math.max(10, quality - 5);
+      }
+    } while (optimizedSizeKB > 250 && quality > 10);
 
-    // Guardar archivo optimizado
-    await fs.writeFile(outputPath, webpBuffer);
-    //console.log(`Imagen optimizada guardada como ${outputPath} (${optimizedSizeKB.toFixed(2)} KB)`);
+    // Escribir en archivo temporal primero
+    await fs.writeFile(tempFilePath, webpBuffer);
+    
+    // Renombrar a la ubicación final (operación atómica)
+    await fs.rename(tempFilePath, outputPath);
 
     return outputPath;
 
   } catch (error) {
+    // Limpieza de archivos temporales en caso de error
+    await Promise.all([
+      fs.unlink(tempFilePath).catch(() => {}),
+      fs.unlink(outputPath).catch(() => {})
+    ]);
+    
     console.error('Error al procesar la imagen:', error);
-    throw error; // Propagar el error para manejo externo
+    throw error;
   }
 }
