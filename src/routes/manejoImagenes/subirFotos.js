@@ -21,7 +21,7 @@ fotos.post('/:tipo/:id',verificarToken, upload.single('imagen'), subirImagen);
 
 //sube imagenes a la categoria
 fotos.post("/categorias/:categoria/:id",verificarToken, noUser,sanitizarDatos,  upload.array('imagenes', 10), subirImagenCategoria)
-
+fotos.post("/categorias/:categoria/:id/agregar", upload.array('imagenes', 10),  subirImagenCategoria)
 
 fotos.delete("/categorias/:categoria/:id/:imagen",verificarToken, sanitizarDatos, eliminarImagenCategoria)
 

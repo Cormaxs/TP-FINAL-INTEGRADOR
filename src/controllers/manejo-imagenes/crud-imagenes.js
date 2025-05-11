@@ -277,3 +277,5 @@ export const actualizarPrecioCategoria= async (req,res) => {
     const respuesta = await updatePriceCategoria(req.params.id, req.body);
     res.send(respuesta)
 }
+
+
