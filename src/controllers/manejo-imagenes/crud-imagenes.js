@@ -62,81 +62,107 @@ export const subirImagen = async (req, res) => {
 
 //sube img categorias en carpeta local
 export const subirImagenCategoria = async (req, res) => {
-    const { id, categoria } = req.params;
-    const { precio } = req.body;
-  
-    try {
-      // Verificar/crear estructura de carpetas
+  const { id, categoria } = req.params;
+  const { precio } = req.body;
+
+  // Validación temprana
+  if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: "No se han subido archivos" });
+  }
+
+  try {
+      // 1. Preparar estructura de directorios
       const { categorias: rutaCategorias } = await crearUserID(id);
       const rutaCategoria = join(rutaCategorias, categoria);
       await fs.mkdir(rutaCategoria, { recursive: true });
-  
-      const resultados = await Promise.all(
-        req.files.map(async (file) => {
-          // Optimizar imagen y obtener nueva ruta (con extensión .webp)
-          const rutaOptimizada = await optimizarImagenes(file.path);
-  
-          // Definir nombre final y ruta final
-          const nombreFinal = path.basename(rutaOptimizada);
-          const rutaFinal = join(rutaCategoria, nombreFinal);
-  
-          // Eliminar si ya existe
+
+      // 2. Procesar imágenes en serie para mejor control de memoria
+      const resultados = [];
+      const errores = [];
+
+      for (const file of req.files) {
+          let rutaOptimizada;
           try {
-            await fs.access(rutaFinal);
-            await fs.unlink(rutaFinal);
-          } catch (err) {
-            if (err.code !== 'ENOENT') throw err;
+              // 3. Optimizar imagen
+              rutaOptimizada = await optimizarImagenes(file.path);
+              
+              // 4. Generar nombre único basado en timestamp
+              const timestamp = Date.now();
+              const nombreFinal = `${timestamp}_${path.basename(rutaOptimizada)}`;
+              const rutaFinal = join(rutaCategoria, nombreFinal);
+
+              // 5. Mover archivo (operación atómica)
+              await fs.rename(rutaOptimizada, rutaFinal);
+
+              // 6. Generar URL pública
+              const rutaRelativa = path.join('imagenes', id, 'categorias', categoria, nombreFinal)
+                  .replace(/\\/g, '/');
+              const url = `${req.protocol}://${req.get('host')}/${rutaRelativa}`;
+
+              resultados.push({
+                  url,
+                  nombreArchivo: nombreFinal,
+                  categoria,
+                  extension: '.webp',
+                  size: (await fs.stat(rutaFinal)).size
+              });
+
+          } catch (error) {
+              errores.push({
+                  nombreArchivo: file.originalname,
+                  error: error.message
+              });
+              console.error(`Error procesando ${file.originalname}:`, error);
+              
+              // Limpieza de archivos temporales en caso de error
+              if (rutaOptimizada) {
+                  await fs.unlink(rutaOptimizada).catch(() => {});
+              }
+          } finally {
+              // Eliminar archivo temporal original siempre
+              await fs.unlink(file.path).catch(() => {});
           }
-  
-          // Mover imagen optimizada a su ubicación final
-          await fs.rename(rutaOptimizada, rutaFinal);
-  
-          // Eliminar archivo temporal original
-          await fs.unlink(file.path);
-  
-          // Generar URL pública
-          const rutaRelativa = join('imagenes', id, 'categorias', categoria, nombreFinal);
-          const url = `https://${req.get('host')}/${rutaRelativa.replace(/\\/g, '/')}`;
-  
-          return {
-            url,
-            nombreArchivo: nombreFinal,
-            categoria,
-            extension: '.webp',
-          };
-        })
-      );
-  
-      // Guardar en MongoDB
+      }
+
+      // 7. Manejo de resultados/errores
+      if (resultados.length === 0) {
+          throw new Error(`Ninguna imagen se pudo procesar: ${errores.map(e => e.error).join(', ')}`);
+      }
+
+      // 8. Guardar en MongoDB
       const urlsImagenes = resultados.map(r => r.url);
       const resultadoMongo = await agregarImgCategoria(id, categoria, precio, urlsImagenes);
-  
+
       if (!resultadoMongo.success) {
-        throw new Error(resultadoMongo.error);
+          throw new Error(resultadoMongo.error);
       }
-  
+
       res.json({
-        success: true,
-        mensaje: `${req.files.length} imágenes procesadas en categoría ${categoria}`,
-        resultados,
-        mongoResult: resultadoMongo,
+          success: true,
+          mensaje: `${resultados.length} imágenes procesadas en categoría ${categoria}`,
+          resultados,
+          ...(errores.length > 0 && { advertencias: errores }),
+          mongoResult: resultadoMongo
       });
-  
-    } catch (error) {
-      // Eliminar archivos temporales si ocurre un error
+
+  } catch (error) {
+      // Limpieza general en caso de error
       if (req.files) {
-        await Promise.all(
-          req.files.map(file => fs.unlink(file.path).catch(() => {}))
-        );
+          await Promise.allSettled(
+              req.files.map(file => fs.unlink(file.path).catch(() => {}))
+          );
       }
-  
+      
       console.error('Error al subir imágenes por categoría:', error);
       res.status(500).json({
-        error: "Error al procesar imágenes",
-        detalle: error.message
+          error: "Error al procesar imágenes",
+          ...(process.env.NODE_ENV === 'development' && { 
+              detalle: error.message,
+              stack: error.stack 
+          })
       });
-    }
-  };
+  }
+};
 
 //elimina archivos
 export const eliminarImagenCategoria = async (req, res) => {
