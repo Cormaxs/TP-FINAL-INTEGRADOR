@@ -2,26 +2,30 @@ import sharp from 'sharp';
 import fs from 'fs-extra';
 import path from 'path';
 
+// Función para optimizar una imagen y convertirla a .webp sin agotar la RAM
 export async function optimizarImagenes(inputPath) {
   let outputPath = '';
-  let tempFilePath = ''; // Para manejar archivos temporales
+  let tempFilePath = '';
+  let image = null; // Instancia de sharp que destruiremos después
 
   try {
-    // Crear ruta de salida con extensión .webp
+    // Construir las rutas de salida
     const { dir, name } = path.parse(inputPath);
     outputPath = path.join(dir, `${name}.webp`);
     tempFilePath = path.join(dir, `${name}_temp.webp`);
 
-    // Leer el archivo en buffer primero para cerrar el stream inmediatamente
+    // Leer la imagen original como buffer
     const inputBuffer = await fs.readFile(inputPath);
-    
-    // Procesar la imagen
-    const image = sharp(inputBuffer);
+
+    // Inicializar sharp con el buffer
+    image = sharp(inputBuffer, { failOnError: false });
+
+    // Obtener dimensiones de la imagen
     const metadata = await image.metadata();
     const width = metadata.width;
     const height = metadata.height;
 
-    // Determinar ancho objetivo
+    // Determinar el ancho de destino según la resolución original
     let targetWidth;
     if (Math.max(width, height) > 2000) {
       targetWidth = 2000;
@@ -31,42 +35,51 @@ export async function optimizarImagenes(inputPath) {
       targetWidth = 720;
     }
 
-    // Redimensionar y convertir
+    // Ajustes de calidad y bucle para reducir el tamaño
     let quality = 80;
-    let resizedImage = image.resize({ 
-      width: targetWidth, 
-      withoutEnlargement: true 
-    });
-
-    // Optimización en pasos
     let webpBuffer;
     let optimizedSizeKB;
-    
+
     do {
+      // Liberar instancia anterior si existe
+      if (image) image.destroy();
+
+      // Re-crear la instancia para evitar residuos en memoria
+      image = sharp(inputBuffer, { failOnError: false });
+
+      // Redimensionar y generar el buffer .webp
+      const resizedImage = image.resize({
+        width: targetWidth,
+        withoutEnlargement: true
+      });
+
       webpBuffer = await resizedImage.webp({ quality }).toBuffer();
       optimizedSizeKB = webpBuffer.length / 1024;
-      
+
       if (optimizedSizeKB > 250) {
-        quality = Math.max(10, quality - 5);
+        quality = Math.max(10, quality - 5); // Reducir calidad si es necesario
       }
     } while (optimizedSizeKB > 250 && quality > 10);
 
-    // Escribir en archivo temporal primero
+    // Escribir primero un archivo temporal para seguridad
     await fs.writeFile(tempFilePath, webpBuffer);
-    
-    // Renombrar a la ubicación final (operación atómica)
+
+    // Renombrar para guardar como final
     await fs.rename(tempFilePath, outputPath);
 
     return outputPath;
 
   } catch (error) {
-    // Limpieza de archivos temporales en caso de error
+    // En caso de error, eliminar archivos temporales
     await Promise.all([
       fs.unlink(tempFilePath).catch(() => {}),
       fs.unlink(outputPath).catch(() => {})
     ]);
-    
-    console.error('Error al procesar la imagen:', error);
+    console.error('❌ Error al procesar la imagen:', error);
     throw error;
+
+  } finally {
+    // Liberar recursos nativos de sharp
+    if (image) image.destroy();
   }
 }
