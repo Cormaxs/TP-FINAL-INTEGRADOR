@@ -1,10 +1,9 @@
 import { promises as fs } from 'fs';
-
 import path, { join }  from 'path';
 import { guardarEnDB, agregarImgCategoria, eliminarCategoriaDB, eliminarFotosCategoria, updatePriceCategoria } from '../../services/imagenPortafaPerfil/guardarEnDB.js';
 import { crearUserID } from '../crearCarpetas/crearCarpetas.js';
 import { coleccionErrores } from '../../middleware/manejoDeErrores/coleccion-errores.js';
-import { optimizarImagenes } from './optimizar-imagenes.js'; 
+
 
 const rootDir = process.cwd();
 const imagesDir = join(rootDir, 'imagenes');
@@ -12,50 +11,67 @@ const imagesDir = join(rootDir, 'imagenes');
 export const subirImagen = async (req, res) => {
   const { id, tipo } = req.params;
 
-  try {
-    if (tipo !== 'perfil' && tipo !== 'portada') {
-      return res.status(400).json({ success: false, error: "Tipo de imagen no válido. Debe ser 'perfil' o 'portada'." });
-    }
+  // Validación básica del tipo de imagen
+  if (tipo !== 'perfil' && tipo !== 'portada') {
+    return res.status(400).json({ 
+      success: false, 
+      error: "Tipo de imagen no válido. Debe ser 'perfil' o 'portada'." 
+    });
+  }
 
-    // Crear carpetas necesarias
+  try {
+    // 1. Crear estructura de directorios
     await crearUserID(id);
     const destinoDir = join(imagesDir, id, 'perfil-portada');
+    await fs.mkdir(destinoDir, { recursive: true });
 
-    // Eliminar archivos anteriores del mismo tipo
-    const archivos = await fs.readdir(destinoDir);
-    for (const archivo of archivos) {
-      if (archivo.startsWith(tipo)) {
-        await fs.unlink(join(destinoDir, archivo));
-        
+    // 2. Eliminar imágenes anteriores del mismo tipo
+    try {
+      const archivos = await fs.readdir(destinoDir);
+      for (const archivo of archivos) {
+        if (archivo.startsWith(tipo)) {
+          await fs.unlink(join(destinoDir, archivo));
+        }
       }
+    } catch (err) {
+      // Si no existe el directorio o no hay archivos, continuamos
+      if (err.code !== 'ENOENT') throw err;
     }
 
-    // Optimizar imagen desde la ruta temporal
-    const rutaTemporal = req.file.path;
-    const rutaOptimizada = await optimizarImagenes(rutaTemporal);
-
-    // Renombrar archivo optimizado a nombre final en carpeta destino
-    const nombreArchivoFinal = `${tipo}-${id}.webp`;
+    // 3. Mover el archivo directamente
+    const extension = path.extname(req.file.originalname);
+    const nombreArchivoFinal = `${tipo}-${id}${extension}`;
     const rutaFinal = join(destinoDir, nombreArchivoFinal);
-    await fs.rename(rutaOptimizada, rutaFinal);
-    await fs.unlink(req.file.path);
+    
+    await fs.rename(req.file.path, rutaFinal);
 
+    // 4. Generar URL pública
+    const rutaRelativa = join('imagenes', id, 'perfil-portada', nombreArchivoFinal)
+      .replace(/\\/g, '/');
+    const url = `${req.protocol}://${req.get('host')}/${rutaRelativa}`;
 
-    // URL pública
-    const rutaRelativa = join('imagenes', id, 'perfil-portada', nombreArchivoFinal);
-    const url = `https://${req.get('host')}/${rutaRelativa.replace(/\\/g, '/')}`;
-
-    // Guardar en la base de datos
+    // 5. Guardar en la base de datos
     await guardarEnDB(url, id, tipo);
 
     res.status(200).json({
       success: true,
       url,
-      rutaLocal: rutaRelativa
+      rutaLocal: rutaRelativa,
+      nombreArchivo: nombreArchivoFinal
     });
 
   } catch (error) {
-    throw coleccionErrores.errAlGuardarImagen(error);
+    // Limpieza en caso de error
+    if (req.file?.path) {
+      await fs.unlink(req.file.path).catch(() => {});
+    }
+    
+    console.error('Error al subir imagen:', error);
+    res.status(500).json({
+      success: false,
+      error: "Error al subir imagen",
+      detalle: error.message
+    });
   }
 };
 
@@ -66,102 +82,72 @@ export const subirImagenCategoria = async (req, res) => {
   const { id, categoria } = req.params;
   const { precio } = req.body;
 
-  // Validación temprana
+  // Validación básica
   if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: "No se han subido archivos" });
+    return res.status(400).json({ error: "No se han subido archivos" });
   }
 
   try {
-      // 1. Preparar estructura de directorios
-      const { categorias: rutaCategorias } = await crearUserID(id);
-      const rutaCategoria = join(rutaCategorias, categoria);
-      await fs.mkdir(rutaCategoria, { recursive: true });
+    // 1. Crear estructura de directorios
+    const { categorias: rutaCategorias } = await crearUserID(id);
+    const rutaCategoria = join(rutaCategorias, categoria);
+    await fs.mkdir(rutaCategoria, { recursive: true });
 
-      // 2. Procesar imágenes en serie para mejor control de memoria
-      const resultados = [];
-      const errores = [];
+    // 2. Procesar imágenes
+    const resultados = [];
+    
+    for (const file of req.files) {
+      try {
+        // Generar nombre único
+        const timestamp = Date.now();
+        const nombreFinal = `${timestamp}_${file.originalname}`;
+        const rutaFinal = join(rutaCategoria, nombreFinal);
 
-      for (const file of req.files) {
-          let rutaOptimizada;
-          try {
-              // 3. Optimizar imagen
-              rutaOptimizada = await optimizarImagenes(file.path);
-              
-              // 4. Generar nombre único basado en timestamp
-              const timestamp = Date.now();
-              const nombreFinal = `${timestamp}_${path.basename(rutaOptimizada)}`;
-              const rutaFinal = join(rutaCategoria, nombreFinal);
+        // Mover archivo directamente
+        await fs.rename(file.path, rutaFinal);
 
-              // 5. Mover archivo (operación atómica)
-              await fs.rename(rutaOptimizada, rutaFinal);
+        // Generar URL pública
+        const rutaRelativa = path.join('imagenes', id, 'categorias', categoria, nombreFinal)
+          .replace(/\\/g, '/');
+        const url = `${req.protocol}://${req.get('host')}/${rutaRelativa}`;
 
-              // 6. Generar URL pública
-              const rutaRelativa = path.join('imagenes', id, 'categorias', categoria, nombreFinal)
-                  .replace(/\\/g, '/');
-              const url = `${req.protocol}://${req.get('host')}/${rutaRelativa}`;
+        resultados.push({
+          url,
+          nombreArchivo: nombreFinal,
+          categoria,
+          extension: path.extname(file.originalname),
+          size: (await fs.stat(rutaFinal)).size
+        });
 
-              resultados.push({
-                  url,
-                  nombreArchivo: nombreFinal,
-                  categoria,
-                  extension: '.webp',
-                  size: (await fs.stat(rutaFinal)).size
-              });
-
-          } catch (error) {
-              errores.push({
-                  nombreArchivo: file.originalname,
-                  error: error.message
-              });
-              console.error(`Error procesando ${file.originalname}:`, error);
-              
-              // Limpieza de archivos temporales en caso de error
-              if (rutaOptimizada) {
-                  await fs.unlink(rutaOptimizada).catch(() => {});
-              }
-          } finally {
-              // Eliminar archivo temporal original siempre
-              await fs.unlink(file.path).catch(() => {});
-          }
+      } catch (error) {
+        // Si hay error, eliminar archivo temporal
+        await fs.unlink(file.path).catch(() => {});
+        console.error(`Error moviendo ${file.originalname}:`, error);
+        throw error; // Detenemos el proceso ante el primer error
       }
+    }
 
-      // 7. Manejo de resultados/errores
-      if (resultados.length === 0) {
-          throw new Error(`Ninguna imagen se pudo procesar: ${errores.map(e => e.error).join(', ')}`);
-      }
+    // 3. Guardar en MongoDB
+    const urlsImagenes = resultados.map(r => r.url);
+    const resultadoMongo = await agregarImgCategoria(id, categoria, precio, urlsImagenes);
 
-      // 8. Guardar en MongoDB
-      const urlsImagenes = resultados.map(r => r.url);
-      const resultadoMongo = await agregarImgCategoria(id, categoria, precio, urlsImagenes);
+    if (!resultadoMongo.success) {
+      throw new Error(resultadoMongo.error);
+    }
 
-      if (!resultadoMongo.success) {
-          throw new Error(resultadoMongo.error);
-      }
-
-      res.json({
-          success: true,
-          mensaje: `${resultados.length} imágenes procesadas en categoría ${categoria}`,
-          resultados,
-          ...(errores.length > 0 && { advertencias: errores }),
-          mongoResult: resultadoMongo
-      });
+    res.json({
+      success: true,
+      mensaje: `${resultados.length} imágenes subidas a categoría ${categoria}`,
+      resultados,
+      mongoResult: resultadoMongo
+    });
 
   } catch (error) {
-      // Limpieza general en caso de error
-      if (req.files) {
-          await Promise.allSettled(
-              req.files.map(file => fs.unlink(file.path).catch(() => {}))
-          );
-      }
-      
-      console.error('Error al subir imágenes por categoría:', error);
-      res.status(500).json({
-          error: "Error al procesar imágenes",
-          ...(process.env.NODE_ENV === 'development' && { 
-              detalle: error.message,
-              stack: error.stack 
-          })
-      });
+    console.error('Error al subir imágenes:', error);
+    res.status(500).json({
+      error: "Error al subir imágenes",
+      detalle: error.message
+    });
   }
 };
 

@@ -4,6 +4,7 @@ import {verificarToken} from "../../middleware/token/verificarToken.js"
 import { subirImagen, subirImagenCategoria, eliminarImagenCategoria, eliminarCategoria,actualizarPrecioCategoria } from '../../controllers/manejo-imagenes/crud-imagenes.js';
 import { sanitizarDatos } from '../../middleware/subidaImagenes/validacionesImg.js';
 import { noUser } from '../../middleware/subidaImagenes/validacionesImg.js';
+//import { optimizarImagen } from '../../controllers/manejo-imagenes/optimizar-imagenes.js';
 
 export const fotos = express.Router();
 
