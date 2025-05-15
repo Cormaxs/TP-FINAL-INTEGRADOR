@@ -18,10 +18,10 @@ const upload = multer({
  
 
 //subir img perfil y portada, agregar un middleware de verificacion de token he id y recien permitir edicion
-fotos.post('/:tipo/:id', upload.single('imagen'), verificarToken, optimizarImagenes, subirImagen);
+fotos.post('/:tipo/:id', upload.single('imagen'),  optimizarImagenes, subirImagen);
 
 //sube imagenes a la categoria
-fotos.post("/categorias/:categoria/:id",verificarToken, noUser,sanitizarDatos,  upload.array('imagenes', 10), optimizarImagenes, subirImagenCategoria)
+fotos.post("/categorias/:categoria/:id",  upload.array('imagenes', 10), optimizarImagenes, subirImagenCategoria)
 fotos.post("/categorias/:categoria/:id/agregar", upload.array('imagenes', 10),  optimizarImagenes, subirImagenCategoria)
 
 fotos.delete("/categorias/:categoria/:id/:imagen",verificarToken, sanitizarDatos, eliminarImagenCategoria)

@@ -1,14 +1,9 @@
-import fs from 'fs';
 import path from 'path';
-import sharp from 'sharp';
+import fs from 'fs';
+import { fork } from 'child_process';
+import { fileURLToPath } from 'url';
 
-// Desactiva caché para evitar consumo excesivo de memoria
-sharp.cache(false);
-
-const MAX_SIZE = 200 * 1024; // 200 KB
-const MIN_QUALITY = 30;
-const MIN_DIMENSION = 320;
-const DIMENSION_STEP = 100;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export async function optimizarImagenes(req, res, next) {
   try {
@@ -18,69 +13,46 @@ export async function optimizarImagenes(req, res, next) {
       return res.status(400).json({ error: 'No se subió ninguna imagen' });
     }
 
-    for (const imagen of archivos) {
-      const nombreOriginal = imagen.originalname;
-      const nombreBase = path.parse(nombreOriginal).name;
-      const nombreFinal = `${Date.now()}-${nombreBase}.webp`;
-      const rutaDestino = path.join('imagenes', nombreFinal);
+    const promesas = archivos.map((imagen) => {
+      return new Promise((resolve, reject) => {
+        const proceso = fork(path.join(__dirname, 'optimizador-hijo.js'));
 
-      const metadata = await sharp(imagen.buffer).metadata();
+        const nombreOriginal = imagen.originalname;
+        const nombreBase = path.parse(nombreOriginal).name;
+        const nombreFinal = `${Date.now()}-${nombreBase}.webp`;
+        const rutaDestino = path.join('imagenes', nombreFinal);
 
-      let dimensionObjetivo = Math.min(metadata.width, metadata.height);
-      dimensionObjetivo = Math.min(dimensionObjetivo, 2000);
+        proceso.send({
+          buffer: imagen.buffer.toString('base64'),
+          rutaDestino
+        });
 
-      let calidad = 80;
-      let bufferOptimizado;
+        proceso.on('message', (msg) => {
+          if (msg.success) {
+            imagen.path = rutaDestino;
+            imagen.filename = nombreFinal;
+            imagen.optimizada = true;
+            imagen.buffer = null;
+            resolve();
+          } else {
+            reject(new Error(msg.error));
+          }
+        });
 
-      do {
-        const bufferTemp = await sharp(imagen.buffer)
-          .resize({
-            width: dimensionObjetivo,
-            height: dimensionObjetivo,
-            fit: 'inside'
-          })
-          .webp({ quality: calidad })
-          .toBuffer();
+        proceso.on('error', reject);
+        proceso.on('exit', (code) => {
+          if (code !== 0) {
+            reject(new Error(`Subproceso terminó con código ${code}`));
+          }
+        });
+      });
+    });
 
-        if (bufferTemp.length <= MAX_SIZE) {
-          bufferOptimizado = bufferTemp;
-          break;
-        }
-
-        if (calidad > MIN_QUALITY) {
-          calidad -= 10;
-        } else if (dimensionObjetivo > MIN_DIMENSION) {
-          dimensionObjetivo -= DIMENSION_STEP;
-          calidad = 80;
-        } else {
-          bufferOptimizado = bufferTemp;
-          break;
-        }
-      } while (true);
-
-      if (bufferOptimizado.length > MAX_SIZE) {
-        console.warn(`⚠️ La imagen ${nombreOriginal} no pudo comprimirse por debajo de 200KB`);
-      }
-
-      fs.writeFileSync(rutaDestino, bufferOptimizado);
-
-      // Limpiamos referencias
-      imagen.buffer = null;
-      imagen.path = rutaDestino;
-      imagen.filename = nombreFinal;
-      imagen.optimizada = true;
-
-      bufferOptimizado = null;
-    }
-
-    // Forzamos GC si se habilitó con --expose-gc
-    if (global.gc) {
-      global.gc();
-    }
-
+    await Promise.all(promesas);
     next();
-  } catch (error) {
-    console.error("Error al procesar las imágenes:", error);
+
+  } catch (err) {
+    console.error("Error al procesar las imágenes:", err);
     res.status(500).json({ error: 'Error al procesar las imágenes' });
   }
 }
