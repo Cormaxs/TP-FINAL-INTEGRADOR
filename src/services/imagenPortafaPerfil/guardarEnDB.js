@@ -168,3 +168,32 @@ export async function updatePriceCategoria(id, datos) {
 }
 
 
+
+export async function updateNameCategoria(id, categoria, nuevacategoria) {
+  try {
+    // Buscar al usuario por su ID
+    const user = await User.findById(id);
+    if (!user) {
+      throw new Error("Usuario no encontrado");
+    }
+
+    // Buscar la categoría dentro del array `categorias`
+    const categoriaEncontrada = user.categorias.find(cat => cat.categoria === categoria);
+
+    if (!categoriaEncontrada) {
+      throw new Error("Categoría no encontrada en el usuario");
+    }
+
+    // Actualizar el nombre de la categoría
+    categoriaEncontrada.categoria = nuevacategoria;
+
+    // Guardar los cambios en la base de datos
+    await user.save();
+
+    return { mensaje: "Nombre de categoría actualizado correctamente" };
+  } catch (error) {
+    console.error("Error al actualizar el nombre de la categoría:", error);
+    throw error;
+  }
+}
+

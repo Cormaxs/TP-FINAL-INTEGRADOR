@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import path, { join }  from 'path';
-import { guardarEnDB, agregarImgCategoria, eliminarCategoriaDB, eliminarFotosCategoria, updatePriceCategoria } from '../../services/imagenPortafaPerfil/guardarEnDB.js';
+import { guardarEnDB, agregarImgCategoria, eliminarCategoriaDB, eliminarFotosCategoria, updatePriceCategoria, updateNameCategoria } from '../../services/imagenPortafaPerfil/guardarEnDB.js';
 import { crearUserID } from '../crearCarpetas/crearCarpetas.js';
 import { coleccionErrores } from '../../middleware/manejoDeErrores/coleccion-errores.js';
 
@@ -39,7 +39,7 @@ export const subirImagen = async (req, res) => {
     }
 
     // 3. Mover el archivo directamente
-    const extension = path.extname(req.file.originalname);
+    const extension = `${path.extname(req.file.originalname)}.webp`;
     const nombreArchivoFinal = `${tipo}-${id}${extension}`;
     const rutaFinal = join(destinoDir, nombreArchivoFinal);
     
@@ -100,7 +100,7 @@ export const subirImagenCategoria = async (req, res) => {
       try {
         // Generar nombre único
         const timestamp = Date.now();
-        const nombreFinal = `${timestamp}_${file.originalname}`;
+        const nombreFinal = `${timestamp}_${file.originalname}.webp`;
         const rutaFinal = join(rutaCategoria, nombreFinal);
 
         // Mover archivo directamente
@@ -291,4 +291,15 @@ export const actualizarPrecioCategoria= async (req,res) => {
     res.send(respuesta)
 }
 
+export const actualizarnombreCategoria = async (req, res) => {
 
+  const { id, categoria } = req.params;  // Tomamos id y categoria desde params
+  const { nuevacategoria } = req.body;  // Tomamos el nuevo nombre de la categoría desde el cuerpo de la petición
+  
+  try {
+    const respuesta = await updateNameCategoria(id, categoria, nuevacategoria);
+    res.status(200).json(respuesta);  // Devolvemos una respuesta exitosa
+  } catch (error) {
+    res.status(500).json({ mensaje: error.message });  // En caso de error, devolvemos un mensaje de error
+  }
+};
