@@ -18,17 +18,17 @@ const upload = multer({
  
 
 //subir img perfil y portada, agregar un middleware de verificacion de token he id y recien permitir edicion
-fotos.post('/:tipo/:id', upload.single('imagen'),  optimizarImagenes, subirImagen);
+fotos.post('/:tipo/:id', verificarToken, upload.single('imagen'),  optimizarImagenes, subirImagen);
 
 //sube imagenes a la categoria
-fotos.post("/categorias/:categoria/:id",  upload.array('imagenes', 10), optimizarImagenes, subirImagenCategoria)
-fotos.post("/categorias/:categoria/:id/agregar", upload.array('imagenes', 10),  optimizarImagenes, subirImagenCategoria)
+fotos.post("/categorias/:categoria/:id",  verificarToken, noUser, upload.array('imagenes', 10), optimizarImagenes, subirImagenCategoria)
+fotos.post("/categorias/:categoria/:id/agregar", verificarToken, noUser, upload.array('imagenes', 10),  optimizarImagenes, subirImagenCategoria)
 
-fotos.delete("/categorias/:categoria/:id/:imagen",verificarToken, sanitizarDatos, eliminarImagenCategoria)
+fotos.delete("/categorias/:categoria/:id/:imagen",verificarToken, noUser, sanitizarDatos, eliminarImagenCategoria)
 
 //agregar eliminar categoria
-fotos.delete("/categorias/:categoria/:id",verificarToken, sanitizarDatos, eliminarCategoria);
+fotos.delete("/categorias/:categoria/:id",verificarToken, noUser, sanitizarDatos, eliminarCategoria);
 
-fotos.put("/updatePrice/:categoria/:id",verificarToken, actualizarPrecioCategoria )
+fotos.put("/updatePrice/:categoria/:id",verificarToken, noUser, actualizarPrecioCategoria )
 
-fotos.put("/updateNameCategoria/:categoria/:id", actualizarnombreCategoria )
+fotos.put("/updateNameCategoria/:categoria/:id",noUser, actualizarnombreCategoria )
