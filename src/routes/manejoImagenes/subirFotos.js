@@ -1,28 +1,28 @@
 import express from 'express';
 import multer from 'multer';
 import {verificarToken} from "../../middleware/token/verificarToken.js"
-import { subirImagen, subirImagenCategoria, eliminarImagenCategoria, eliminarCategoria,actualizarPrecioCategoria } from '../../controllers/manejo-imagenes/crud-imagenes.js';
+import { subirImagen, subirImagenCategoria, eliminarImagenCategoria, eliminarCategoria,actualizarPrecioCategoria, actualizarnombreCategoria } from '../../controllers/manejo-imagenes/crud-imagenes.js';
 import { sanitizarDatos } from '../../middleware/subidaImagenes/validacionesImg.js';
 import { noUser } from '../../middleware/subidaImagenes/validacionesImg.js';
-//import { optimizarImagen } from '../../controllers/manejo-imagenes/optimizar-imagenes.js';
+import { optimizarImagenes } from '../../controllers/manejo-imagenes/optimizar-imagenes.js';
 
 export const fotos = express.Router();
 
 const upload = multer({
-    dest: 'imagenes/',
+    storage: multer.memoryStorage(),
     limits: {
-      fileSize: 100 * 1024 * 1024 // 100 MB en bytes
+      fileSize: 1000 * 1024 * 1024 // 100 MB en bytes
     }
   });
 
-
+ 
 
 //subir img perfil y portada, agregar un middleware de verificacion de token he id y recien permitir edicion
-fotos.post('/:tipo/:id',verificarToken, upload.single('imagen'), subirImagen);
+fotos.post('/:tipo/:id', upload.single('imagen'), verificarToken, optimizarImagenes, subirImagen);
 
 //sube imagenes a la categoria
-fotos.post("/categorias/:categoria/:id",verificarToken, noUser,sanitizarDatos,  upload.array('imagenes', 10), subirImagenCategoria)
-fotos.post("/categorias/:categoria/:id/agregar", upload.array('imagenes', 10),  subirImagenCategoria)
+fotos.post("/categorias/:categoria/:id",verificarToken, noUser,sanitizarDatos,  upload.array('imagenes', 10), optimizarImagenes, subirImagenCategoria)
+fotos.post("/categorias/:categoria/:id/agregar", upload.array('imagenes', 10),  optimizarImagenes, subirImagenCategoria)
 
 fotos.delete("/categorias/:categoria/:id/:imagen",verificarToken, sanitizarDatos, eliminarImagenCategoria)
 
@@ -30,3 +30,5 @@ fotos.delete("/categorias/:categoria/:id/:imagen",verificarToken, sanitizarDatos
 fotos.delete("/categorias/:categoria/:id",verificarToken, sanitizarDatos, eliminarCategoria);
 
 fotos.put("/updatePrice/:categoria/:id",verificarToken, actualizarPrecioCategoria )
+
+fotos.put("/updateNameCategoria/:categoria/:id", actualizarnombreCategoria )
