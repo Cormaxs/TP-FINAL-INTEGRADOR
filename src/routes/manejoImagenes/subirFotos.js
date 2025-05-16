@@ -31,4 +31,4 @@ fotos.delete("/categorias/:categoria/:id",verificarToken, noUser, sanitizarDatos
 
 fotos.put("/updatePrice/:categoria/:id",verificarToken, noUser, actualizarPrecioCategoria )
 
-fotos.put("/updateNameCategoria/:categoria/:id",noUser, actualizarnombreCategoria )
+fotos.put("/updateNameCategoria/:categoria/:id",verificarToken, noUser, actualizarnombreCategoria )

@@ -295,7 +295,7 @@ export const actualizarnombreCategoria = async (req, res) => {
 
   const { id, categoria } = req.params;  // Tomamos id y categoria desde params
   const { nuevacategoria } = req.body;  // Tomamos el nuevo nombre de la categoría desde el cuerpo de la petición
-  
+
   try {
     const respuesta = await updateNameCategoria(id, categoria, nuevacategoria);
     res.status(200).json(respuesta);  // Devolvemos una respuesta exitosa
